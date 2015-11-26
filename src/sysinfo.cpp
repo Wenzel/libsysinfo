@@ -1,22 +1,35 @@
 #include <algorithm>
+#include <iostream>
+#include <dirent.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 #include "sysinfo.h"
 
 // trim from start
 static inline std::string &ltrim(std::string &s) {
-        s.erase(s.begin(), std::find_if(s.begin(), s.end(), std::not1(std::ptr_fun<int, int>(std::isspace))));
-        return s;
+    s.erase(s.begin(), std::find_if(s.begin(), s.end(), std::not1(std::ptr_fun<int, int>(std::isspace))));
+    return s;
 }
 
 // trim from end
 static inline std::string &rtrim(std::string &s) {
-        s.erase(std::find_if(s.rbegin(), s.rend(), std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
-        return s;
+    s.erase(std::find_if(s.rbegin(), s.rend(), std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
+    return s;
 }
 
 // trim from both ends
 static inline std::string &trim(std::string &s) {
-        return ltrim(rtrim(s));
+    return ltrim(rtrim(s));
+}
+
+std::vector<std::string> &split(const std::string &s, char delim, std::vector<std::string> &elems) {
+    std::stringstream ss(s);
+    std::string item;
+    while (std::getline(ss, item, delim)) {
+        elems.push_back(item);
+    }
+    return elems;
 }
 
 std::vector<cpu_info_t> readCPUInfo()
@@ -135,4 +148,64 @@ int getNbCores()
     std::vector<cpu_info_t> cpuinfo = readCPUInfo();
 
     return cpuinfo.size();
+}
+
+int processCount()
+{
+    int nbProcess = 0;
+
+    DIR* proc;
+    if ((proc = opendir("/proc")) != NULL)
+    {
+        struct dirent* ent;
+        while ((ent = readdir(proc)) != NULL)
+        {
+            struct stat fileinfo;
+            std::string entry_path = "/proc/" + std::string(ent->d_name);
+            if (stat(entry_path.c_str(), &fileinfo) == 0 && S_ISDIR(fileinfo.st_mode))
+                nbProcess++;
+        }
+    }
+    return nbProcess;
+}
+
+void getProcess(int pid, ProcessInfo* ps)
+{
+    std::string process_path = "/proc/" + std::to_string(pid) + "/";
+
+    // read cmdline
+    std::ifstream if_cmdline(process_path + "cmdline");
+    std::string cur_arg;
+    while (getline(if_cmdline, cur_arg, '\0'))
+        ps->cmdline.push_back(cur_arg);
+    if_cmdline.close();
+
+    return;
+}
+
+std::vector<ProcessInfo> ProcessList()
+{
+    std::vector<ProcessInfo> process_list;
+    DIR* proc;
+    if ((proc = opendir("/proc")) != NULL)
+    {
+        struct dirent* ent;
+        while ((ent = readdir(proc)) != NULL)
+        {
+            struct stat fileinfo;
+            std::string entry_path = "/proc/" + std::string(ent->d_name);
+            if (stat(entry_path.c_str(), &fileinfo) == 0)
+            {
+                // if is_directory and is_digit
+                if (S_ISDIR(fileinfo.st_mode) && std::regex_match(ent->d_name, std::regex("\\d+")))
+                {
+                    int pid = std::stoi(ent->d_name);
+                    ProcessInfo ps;
+                    getProcess(pid, &ps);
+                    process_list.push_back(ps);
+                }
+            }
+        }
+    }
+    return process_list;
 }
