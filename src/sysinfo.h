@@ -6,6 +6,7 @@
 #include <regex>
 #include <unordered_map>
 
+
 struct cpu_info_t
 {
     int processor;
@@ -304,16 +305,42 @@ std::vector<ProcessInfo> ProcessList();
 
 // network
 
-typedef struct unix_socket_t
+
+enum socket_type
+{
+    STREAM,
+    DGRAM
+};
+
+
+enum socket_state {
+    TCP_ESTABLISHED = 1,
+    TCP_SYN_SENT,
+    TCP_SYN_RECV,
+    TCP_FIN_WAIT1,
+    TCP_FIN_WAIT2,
+    TCP_TIME_WAIT,
+    TCP_CLOSE,
+    TCP_CLOSE_WAIT,
+    TCP_LAST_ACK,
+    TCP_LISTEN,
+    TCP_CLOSING,	/* Now a valid state */
+    TCP_NEW_SYN_RECV,
+
+    TCP_MAX_STATES	/* Leave at the end! */
+};
+
+typedef struct
 {
     std::string num;
     int ref_count;
     int protocol;
     int flags;
     int type;
-    int status;
+    enum socket_state state;
     int inode;
     std::string path;
-};
+} unix_socket_t;
+
 
 std::vector<unix_socket_t> getSocketUNIX();

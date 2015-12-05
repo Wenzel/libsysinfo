@@ -399,7 +399,7 @@ std::vector<unix_socket_t> getSocketUNIX()
                     socket.protocol = std::stoi(match[3]);
                     socket.flags = std::stoi(match[4]);
                     socket.type = std::stoi(match[5]);
-                    socket.status = std::stoi(match[6]);
+                    socket.state = static_cast<enum socket_state>(std::stoi(match[6]));
                     socket.inode = std::stoi(match[7]);
                     socket.path = match[8];
                     std::cout << socket.path << std::endl;
