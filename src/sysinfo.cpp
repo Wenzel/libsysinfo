@@ -410,3 +410,42 @@ std::vector<unix_socket_t> getSocketUNIX()
     }
     return unix_socket_list;
 }
+
+std::vector<tcp_socket_t> getSocketTCP()
+{
+    std::vector<tcp_socket_t> tcp_socket_list;
+    std::ifstream if_tcp("/proc/net/tcp");
+    if (if_tcp.is_open())
+    {
+        // skip first line
+        //   sl  local_address rem_address   st tx_queue rx_queue tr tm->when retrnsmt   uid  timeout inode
+        std::string line;
+        while (getline(if_tcp, line))
+        {
+            // line sample
+            //   0: 0ABCDEF:0035 00000000:0000 0A 00000000:00000000 00:00000000 00000000     0        0 29706 1 ffff8800c63f8000 100 0 0 10 0
+            std::regex regex("^\\s+([[:digit:]]+):\\s([[:xdigit:]]+):([[:xdigit:]]+)\\s([[:xdigit:]]+):([[:xdigit:]]+).*$");
+            std::smatch match;
+            if (std::regex_match(line, match, regex))
+            {
+                tcp_socket_t socket;
+                if (match.size() == 5 + 1) // first match represents whole line
+                {
+                    struct in_addr addr;
+
+                    socket.num = std::stoi(match[1]);
+                    addr.s_addr = htonl(std::stol(match[2], 0, 16));
+                    socket.local_address = std::string(inet_ntoa(addr));
+                    socket.local_port = std::stoi(match[3], 0, 16);
+
+                    addr.s_addr = htonl(std::stol(match[4], 0, 16));
+                    socket.rem_address = std::string(inet_ntoa(addr));
+                    socket.rem_port = std::stoi(match[5], 0, 16);
+
+                    tcp_socket_list.push_back(socket);
+                }
+            }
+        }
+    }
+    return tcp_socket_list;
+}

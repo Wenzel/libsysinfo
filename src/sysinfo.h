@@ -5,7 +5,8 @@
 #include <sstream>
 #include <regex>
 #include <unordered_map>
-
+#include <arpa/inet.h>
+#include <sys/socket.h>
 
 struct cpu_info_t
 {
@@ -335,5 +336,21 @@ typedef struct
     std::string path;
 } unix_socket_t;
 
+typedef struct
+{
+    int num;
+    std::string local_address;
+    int local_port;
+    std::string rem_address;
+    int rem_port;
+    int state;
+    int tx_queue;
+    int rx_queue;
+    int timer_active;
+    int tm_when;
+    int retrnsmt;
+    int uid;
+} tcp_socket_t;
 
 std::vector<unix_socket_t> getSocketUNIX();
+std::vector<tcp_socket_t> getSocketTCP();
