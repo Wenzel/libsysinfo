@@ -306,13 +306,6 @@ std::vector<ProcessInfo> ProcessList();
 // network
 
 
-enum socket_type
-{
-    STREAM,
-    DGRAM
-};
-
-
 enum socket_state {
     TCP_ESTABLISHED = 1,
     TCP_SYN_SENT,
