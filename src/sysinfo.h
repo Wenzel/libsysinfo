@@ -4,6 +4,7 @@
 #include <memory>
 #include <sstream>
 #include <regex>
+#include <unordered_map>
 
 struct cpu_info_t
 {
@@ -37,51 +38,205 @@ struct cpu_info_t
 
 enum process_status
 {
-    sleeping
+    running,
+    sleeping,
+    disk_sleep,
+    stopped,
+    tracing_stop,
+    zombie,
+    dead,
+    wakekill,
+    waking,
+    parked
+};
+
+struct io_stat
+{
+    /* characters read */
+    long unsigned int rchar;
+    /* characters written */
+    long unsigned int wchar;
+    /* read syscalls */
+    long unsigned int syscr;
+    /* write syscalls */
+    long unsigned int syscw;
+    /* bytes read */
+    long unsigned int read_bytes;
+    /* bytes written */
+    long unsigned int write_bytes;
+    /*
+     * this field represents the number of bytes which
+     * this process caused to not happen, by truncating
+     * agecache.  A task can cause "negative" I/O too.  If
+     * this task truncates some dirty pagecache, some I/O
+     * which another task has been accounted for (in its
+     * write_bytes) will not be happening.
+    */
+    long unsigned int cancelled_write_bytes;
+
 };
 
 typedef struct {
 
-  /** The parent process ID */
-  pid_t ppid;
+  /** The Process ID */
+    pid_t pid;
 
-  /** The real user ID */
-  uid_t uid;
+    /** The parent process ID */
+    pid_t ppid;
 
-  /** The real group ID */
-  gid_t gid;
+    /** The process group ID of the process */
+    pid_t pgrp;
 
-  /** The process ID of any application that is debugging this one. 0 if none */
-  pid_t tracerpid;
+    /** The session ID of the process */
+    int session;
 
-  /** A character description of the process status */
-  process_status status;
+    /** The controlling terminal of the process */
+    int tty_nr;
 
-  /** The tty the process owns */
-  std::string tty;
+    /** The ID of the foreground process group of the
+     * controlling terminal of the process */
+    int tpgid;
 
-  /**
+    /** The kernel flags word of the process */
+    unsigned int flags;
+
+    /** The number of minor faults the process has made
+     * which have not required loading a memory page from
+     * disk */
+    long unsigned int minflt;
+
+    /** The number of minor faults that the process's
+     * waited-for children have made */
+    long unsigned int cminflt;
+
+    /** The number of major faults the process has made
+     * which have required loading a memory page from disk */
+    long unsigned int majflt;
+
+    /** The number of major faults that the process's
+     * waited-for children have made */
+    long unsigned int cmajflt;
+
+    /** Amount of time that this process has been scheduled
+     * in user mode */
+    long unsigned int utime;
+
+    /** Amount of time that this process has been scheduled
+     * in kernel mode */
+    long unsigned int stime;
+
+    /** Amount of time that this process's waited-for
+     * children have been scheduled in user mode */
+    long unsigned int cutime;
+
+    /** Amount of time that this process's waited-for
+     * children have been scheduled in kernel mode */
+    long unsigned int cstime;
+
+    long int priority;
+
+    long int nice;
+
+    long int num_threads;
+
+    long int itrealvalue;
+
+    long long unsigned int starttime;
+
+    long unsigned int vsize;
+
+    long int rss;
+
+    long unsigned int rsslim;
+
+    long unsigned int startcode;
+
+    long unsigned int endcode;
+
+    long unsigned int startstack;
+
+    long unsigned int kstkesp;
+
+    long unsigned int kstkeip;
+
+    long unsigned int signal;
+
+    long unsigned int blocked;
+
+    long unsigned int siginore;
+
+    long unsigned int sigcatch;
+
+    long unsigned int wchan;
+
+    long unsigned int nswap;
+
+    long unsigned int cnswap;
+
+    int exit_signal;
+
+    int processor;
+
+    unsigned int rt_priority;
+
+    unsigned int policy;
+
+    long long unsigned int delayacct_blkio_ticks;
+
+    long unsigned int guest_time;
+
+    long int cguest_time;
+
+    long unsigned int start_data;
+
+    long unsigned int end_data;
+
+    long unsigned int start_brk;
+
+    long unsigned int arg_start;
+
+    long unsigned int arg_end;
+
+    long unsigned int env_start;
+
+    long unsigned int env_end;
+
+    int exit_code;
+
+    /** The real user ID */
+    uid_t uid;
+
+    /** The real group ID */
+    gid_t gid;
+
+    /** The process ID of any application that is debugging this one. 0 if none */
+    pid_t tracerpid;
+
+    /** A character description of the process status */
+    process_status status;
+
+    /** The tty the process owns */
+    std::string tty;
+
+    /**
     The nice level. The range should be -20 to 20. I'm not sure
     whether this is true for all platforms.
    */
-  int niceLevel;
+    int niceLevel;
 
-  /** The scheduling priority. */
-  int priority;
+    /** The i/o scheduling class and priority. */
+    int ioPriorityClass;  /**< 0 for none, 1 for realtime, 2 for best-effort, 3 for idle.  -1 for error. */
+    int ioPriority;       /**< Between 0 and 7.  0 is highest priority, 7 is lowest.  -1 for error. */
 
-  /** The i/o scheduling class and priority. */
-  int ioPriorityClass;  /**< 0 for none, 1 for realtime, 2 for best-effort, 3 for idle.  -1 for error. */
-  int ioPriority;       /**< Between 0 and 7.  0 is highest priority, 7 is lowest.  -1 for error. */
-
-  /**
+    /**
     The total amount of virtual memory space that this process uses. This includes shared and
     swapped memory, plus graphics memory and mmap'ed files and so on.
 
     This is in KiB
    */
-  unsigned long vmSize;
+    unsigned long vmSize;
 
-  /**
+    /**
     The amount of physical memory the process currently uses, including the physical memory used by any
     shared libraries that it uses.  Hence 2 processes sharing a library will both report their vmRss as including
     this shared memory, even though it's only allocated once.
@@ -89,38 +244,53 @@ typedef struct {
     This is in KiB
    */
 
-  unsigned long vmRss;
+    unsigned long vmRss;
 
-  /** The amount of physical memory that is used by this process, not including any memory used by any shared libraries.
+    /** The amount of physical memory that is used by this process, not including any memory used by any shared libraries.
    *  This is in KiB */
-  unsigned long vmURss;
+    unsigned long vmURss;
 
-  /**
+    /**
     The number of 1/100 of a second the process has spend in user space.
     If a machine has an uptime of 1 1/2 years or longer this is not a
     good idea. I never thought that the stability of UNIX could get me
     into trouble! ;)
    */
-  unsigned long userTime;
+    unsigned long userTime;
 
-  /**
+    /**
     The number of 1/100 of a second the process has spent in system space.
     If a machine has an uptime of 1 1/2 years or longer this is not a
     good idea. I never thought that the stability of UNIX could get me
     into trouble! ;)
    */
-  unsigned long sysTime;
+    unsigned long sysTime;
 
-  /* NOTE:  To get the user/system percentage, record the userTime and sysTime from between calls, then use the difference divided by the difference in time measure in 100th's of a second */
+    /* NOTE:  To get the user/system percentage, record the userTime and sysTime from between calls, then use the difference divided by the difference in time measure in 100th's of a second */
 
-  /** The name of the process */
-  std::string name;
+    /** The name of the process */
+    std::string name;
 
-  /** The command used to start the process */
-  std::vector<std::string> cmdline;
+    /** The command used to start the process */
+    std::vector<std::string> cmdline;
 
-  /** The login name of the user that owns this process */
-  std::string userName;
+    /** The login name of the user that owns this process */
+    std::string userName;
+
+    /** Process's current working directory */
+    std::string cwd;
+
+    /** env */
+    std::unordered_map<std::string, std::string> env;
+
+    /** binary full path */
+    std::string exe;
+
+    /** io stat */
+    struct io_stat io;
+
+    /** root fileystem */
+    std::string root;
 
 } ProcessInfo;
 
@@ -130,3 +300,20 @@ int getNbCPUs();
 int getNbCores();
 int processCount();
 std::vector<ProcessInfo> ProcessList();
+
+
+// network
+
+typedef struct unix_socket_t
+{
+    std::string num;
+    int ref_count;
+    int protocol;
+    int flags;
+    int type;
+    int status;
+    int inode;
+    std::string path;
+};
+
+std::vector<unix_socket_t> getSocketUNIX();
