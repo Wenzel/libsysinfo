@@ -395,7 +395,7 @@ std::vector<unix_socket_t> getSocketUNIX()
                 if (match.size() == 8 + 1) // first match represents whole line
                 {
                     socket.num = match[1]; // TODO xdigit
-                    socket.ref_count = std::stoi(match[2]);
+                    socket.ref_count = std::stoi(match[2], 0, 16);
                     socket.protocol = std::stoi(match[3]);
                     socket.flags = std::stoi(match[4]);
                     socket.type = std::stoi(match[5]);

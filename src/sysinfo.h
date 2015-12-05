@@ -8,6 +8,8 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 
+// Process
+
 struct cpu_info_t
 {
     int processor;
