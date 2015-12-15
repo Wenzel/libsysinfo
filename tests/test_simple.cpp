@@ -11,7 +11,8 @@ int main(int argc, char *argv[])
             {
                 std::cout << arg << " ";
             }
-            std::cout << std::endl << std::endl;
+            std::cout << std::endl;
+            std::cout << p.pid << std::endl;
         }
     }
     std::cout << "nbProcess " << processCount() << std::endl;

@@ -1,5 +1,6 @@
 include_directories(${CMAKE_SOURCE_DIR}/src)
 
-add_executable(test_sysinfo main.cpp)
+add_executable(test_simple test_simple.cpp)
+target_link_libraries(test_simple sysinfo)
 
-target_link_libraries(test_sysinfo sysinfo)
+add_subdirectory(gui_widget)
