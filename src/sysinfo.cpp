@@ -8,6 +8,9 @@
 
 #include "sysinfo.h"
 
+// Private
+
+
 // trim from start
 static inline std::string &ltrim(std::string &s) {
     s.erase(s.begin(), std::find_if(s.begin(), s.end(), std::not1(std::ptr_fun<int, int>(std::isspace))));
@@ -25,7 +28,7 @@ static inline std::string &trim(std::string &s) {
     return ltrim(rtrim(s));
 }
 
-std::vector<std::string> &split(const std::string &s, char delim, std::vector<std::string> &elems) {
+static std::vector<std::string> split(const std::string &s, char delim, std::vector<std::string> &elems) {
     std::stringstream ss(s);
     std::string item;
     while (std::getline(ss, item, delim)) {
@@ -33,6 +36,199 @@ std::vector<std::string> &split(const std::string &s, char delim, std::vector<st
     }
     return elems;
 }
+
+static std::vector<int> getProcessList()
+{
+    std::vector<int> process_pid_list;
+    DIR* proc;
+    if ((proc = opendir("/proc")) != NULL)
+    {
+        struct dirent* ent;
+        while ((ent = readdir(proc)) != NULL)
+        {
+            struct stat fileinfo;
+            std::string entry_path = "/proc/" + std::string(ent->d_name);
+            if (stat(entry_path.c_str(), &fileinfo) == 0
+                    && S_ISDIR(fileinfo.st_mode)
+                    && std::regex_match(ent->d_name, std::regex("\\d+")))
+            {
+                int pid = std::stoi(ent->d_name);
+                process_pid_list.push_back(pid);
+            }
+        }
+    }
+    return process_pid_list;
+}
+
+static void getProcess(int pid, struct process_info_t* pinfo)
+{
+    std::string process_path = "/proc/" + std::to_string(pid) + "/";
+
+    // read cmdline
+    std::ifstream if_cmdline(process_path + "cmdline");
+    std::string cur_arg;
+    while (getline(if_cmdline, cur_arg, '\0'))
+        pinfo->cmdline.push_back(cur_arg);
+    if_cmdline.close();
+
+
+    // read cwd
+    // cwd is a symlink to the process's current working directory
+    char buff[PATH_MAX];
+    std::string cwd_path = process_path + "/cwd";
+    ssize_t len = readlink(cwd_path.c_str(), buff, sizeof(buff) - 1);
+    if (len == -1)
+        throw std::string("Exception while reading /proc/<pid>/cwd");
+    pinfo->cwd = std::string(buff);
+
+    // read environ
+    std::ifstream if_environ(process_path + "environ");
+    std::string cur_env;
+    while (getline(if_environ, cur_env, '\0'))
+    {
+        std::istringstream stream(cur_env);
+        std::string key;
+        std::string value;
+        // split on '='
+        getline(stream, key, '=');
+        getline(stream, value);
+        pinfo->env[key] = value;
+    }
+    if_environ.close();
+
+    // read exe
+    // this file is a symbolic link containing the actual
+    // pathname of the executed command
+    std::string exe_path = process_path + "/exe";
+    len = readlink(exe_path.c_str(), buff, sizeof(buff) - 1);
+    if (len == -1) // some process like kthreadd do not have an executable
+        pinfo->exe = "";
+    else
+        pinfo->exe = std::string(buff);
+
+    // read io
+    std::ifstream if_io(process_path + "io");
+    std::string line;
+    while (getline(if_io, line))
+    {
+        std::string key;
+        std::string value;
+        // parse key: value
+        std::istringstream stream(line);
+        getline(stream, key, ':');
+        getline(stream, value);
+        value = trim(value);
+        if (key == "rchar")
+            pinfo->io.rchar = std::stol(value);
+        else if (key == "wchar")
+            pinfo->io.wchar = sleeping; // TODO
+        else if (key == "syscr")
+            pinfo->io.syscr = std::stol(value);
+        else if (key == "syscw")
+            pinfo->io.syscw = std::stol(value);
+        else if (key == "read_bytes")
+            pinfo->io.read_bytes = std::stol(value);
+        else if (key == "write_bytes")
+            pinfo->io.write_bytes = std::stol(value);
+        else if (key == "cancelled_write_bytes")
+            pinfo->io.cancelled_write_bytes = std::stol(value);
+    }
+    if_io.close();
+
+    // read root
+    // root is a symlink to the process's filesystem root (chroot)
+    std::string root_path = process_path + "/root";
+    len = readlink(root_path.c_str(), buff, sizeof(buff) - 1);
+    if (len == -1)
+        throw std::string("Exception while reading /proc/<pid>/root");
+
+    pinfo->root = std::string(buff);
+
+    // read stat
+    std::ifstream if_stat(process_path + "stat");
+    // pid
+    if_stat >> pinfo->pid;
+    // name
+    if_stat >> pinfo->name; // (name)
+    pinfo->name.erase(pinfo->name.begin()); // remove parenthesis
+    pinfo->name.pop_back();
+    // status
+    std::string status;
+    if_stat >> status;
+    if (status == "R")
+        pinfo->status = running;
+    else if (status == "S")
+        pinfo->status = sleeping;
+    else if (status == "D")
+        pinfo->status = disk_sleep;
+    else if (status == "Z")
+        pinfo->status = zombie;
+    else if (status == "T")
+        pinfo->status = stopped;
+    else if (status == "t")
+        pinfo->status = tracing_stop;
+    else if (status == "W")
+        pinfo->status = waking;
+    else if (status == "X" or status == "x")
+        pinfo->status = dead;
+    else if (status == "K")
+        pinfo->status = wakekill;
+    else if (status == "P")
+        pinfo->status = parked;
+
+    if_stat >> pinfo->ppid;
+    if_stat >> pinfo->pgrp;
+    if_stat >> pinfo->session;
+    if_stat >> pinfo->tty_nr;
+    if_stat >> pinfo->tpgid;
+    if_stat >> pinfo->flags;
+    if_stat >> pinfo->minflt;
+    if_stat >> pinfo->cminflt;
+    if_stat >> pinfo->cmajflt;
+    if_stat >> pinfo->utime;
+    if_stat >> pinfo->stime;
+    if_stat >> pinfo->cutime;
+    if_stat >> pinfo->cstime;
+    if_stat >> pinfo->priority;
+    if_stat >> pinfo->nice;
+    if_stat >> pinfo->num_threads;
+    if_stat >> pinfo->itrealvalue;
+    if_stat >> pinfo->starttime;
+    if_stat >> pinfo->vsize;
+    if_stat >> pinfo->rss;
+    if_stat >> pinfo->rsslim;
+    if_stat >> pinfo->startcode;
+    if_stat >> pinfo->endcode;
+    if_stat >> pinfo->startstack;
+    if_stat >> pinfo->kstkesp;
+    if_stat >> pinfo->kstkeip;
+    if_stat >> pinfo->signal;
+    if_stat >> pinfo->blocked;
+    if_stat >> pinfo->siginore;
+    if_stat >> pinfo->sigcatch;
+    if_stat >> pinfo->wchan;
+    if_stat >> pinfo->nswap;
+    if_stat >> pinfo->cnswap;
+    if_stat >> pinfo->exit_signal;
+    if_stat >> pinfo->processor;
+    if_stat >> pinfo->rt_priority;
+    if_stat >> pinfo->policy;
+    if_stat >> pinfo->delayacct_blkio_ticks;
+    if_stat >> pinfo->guest_time;
+    if_stat >> pinfo->cguest_time;
+    if_stat >> pinfo->start_data;
+    if_stat >> pinfo->end_data;
+    if_stat >> pinfo->start_brk;
+    if_stat >> pinfo->arg_start;
+    if_stat >> pinfo->arg_end;
+    if_stat >> pinfo->env_start;
+    if_stat >> pinfo->env_end;
+    if_stat >> pinfo->exit_code;
+
+    if_stat.close();
+}
+
+// Public API
 
 std::vector<cpu_info_t> readCPUInfo()
 {
@@ -111,7 +307,7 @@ std::vector<cpu_info_t> readCPUInfo()
         }
         else if (key == "bugs")
             cur_cpuinfo.bugs = value;
-        else if (key == "bogomips")
+        else if (key == "bogomipinfo")
             cur_cpuinfo.bogomips = std::stol(value);
         else if (key == "clflush size")
             cur_cpuinfo.clflush_size = std::stoi(value);
@@ -154,224 +350,30 @@ int getNbCores()
 
 int processCount()
 {
-    int nbProcess = 0;
+    return getProcessList().size();
 
-    DIR* proc;
-    if ((proc = opendir("/proc")) != NULL)
-    {
-        struct dirent* ent;
-        while ((ent = readdir(proc)) != NULL)
-        {
-            struct stat fileinfo;
-            std::string entry_path = "/proc/" + std::string(ent->d_name);
-            if (stat(entry_path.c_str(), &fileinfo) == 0 && S_ISDIR(fileinfo.st_mode))
-                nbProcess++;
-        }
-    }
-    return nbProcess;
 }
 
-void getProcess(int pid, ProcessInfo* ps)
+std::vector<struct process_info_t> ProcessList()
 {
-    std::string process_path = "/proc/" + std::to_string(pid) + "/";
+    std::vector<struct process_info_t> process_list;
+    std::vector<int> process_pid_list = getProcessList();
 
-    // read cmdline
-    std::ifstream if_cmdline(process_path + "cmdline");
-    std::string cur_arg;
-    while (getline(if_cmdline, cur_arg, '\0'))
-        ps->cmdline.push_back(cur_arg);
-    if_cmdline.close();
-
-
-    // read cwd
-    // cwd is a symlink to the process's current working directory
-    char buff[PATH_MAX];
-    std::string cwd_path = process_path + "/cwd";
-    ssize_t len = readlink(cwd_path.c_str(), buff, sizeof(buff) - 1);
-    if (len == -1)
-        throw std::string("Exception while reading /proc/<pid>/cwd");
-    ps->cwd = std::string(buff);
-
-    // read environ
-    std::ifstream if_environ(process_path + "environ");
-    std::string cur_env;
-    while (getline(if_environ, cur_env, '\0'))
+    for (int pid : process_pid_list)
     {
-        std::istringstream stream(cur_env);
-        std::string key;
-        std::string value;
-        // split on '='
-        getline(stream, key, '=');
-        getline(stream, value);
-        ps->env[key] = value;
-    }
-    if_environ.close();
-
-    // read exe
-    // this file is a symbolic link containing the actual
-    // pathname of the executed command
-    std::string exe_path = process_path + "/exe";
-    len = readlink(exe_path.c_str(), buff, sizeof(buff) - 1);
-    if (len == -1)
-        throw std::string("Exception while reading /proc/<pid>/exe");
-
-    ps->exe = std::string(buff);
-
-    // read io
-    std::ifstream if_io(process_path + "io");
-    std::string line;
-    while (getline(if_io, line))
-    {
-        std::string key;
-        std::string value;
-        // parse key: value
-        std::istringstream stream(line);
-        getline(stream, key, ':');
-        getline(stream, value);
-        value = trim(value);
-        if (key == "rchar")
-            ps->io.rchar = std::stol(value);
-        else if (key == "wchar")
-            ps->io.wchar = sleeping; // TODO
-        else if (key == "syscr")
-            ps->io.syscr = std::stol(value);
-        else if (key == "syscw")
-            ps->io.syscw = std::stol(value);
-        else if (key == "read_bytes")
-            ps->io.read_bytes = std::stol(value);
-        else if (key == "write_bytes")
-            ps->io.write_bytes = std::stol(value);
-        else if (key == "cancelled_write_bytes")
-            ps->io.cancelled_write_bytes = std::stol(value);
-    }
-    if_io.close();
-
-    // read root
-    // root is a symlink to the process's filesystem root (chroot)
-    std::string root_path = process_path + "/root";
-    len = readlink(root_path.c_str(), buff, sizeof(buff) - 1);
-    if (len == -1)
-        throw std::string("Exception while reading /proc/<pid>/root");
-
-    ps->root = std::string(buff);
-
-    // read stat
-    std::ifstream if_stat(process_path + "stat");
-    // pid
-    if_stat >> ps->pid;
-    // name
-    if_stat >> ps->name; // (name)
-    ps->name.erase(ps->name.begin()); // remove parenthesis
-    ps->name.pop_back();
-    // status
-    std::string status;
-    if_stat >> status;
-    if (status == "R")
-        ps->status = running;
-    else if (status == "S")
-        ps->status = sleeping;
-    else if (status == "D")
-        ps->status = disk_sleep;
-    else if (status == "Z")
-        ps->status = zombie;
-    else if (status == "T")
-        ps->status = stopped;
-    else if (status == "t")
-        ps->status = tracing_stop;
-    else if (status == "W")
-        ps->status = waking;
-    else if (status == "X" or status == "x")
-        ps->status = dead;
-    else if (status == "K")
-        ps->status = wakekill;
-    else if (status == "P")
-        ps->status = parked;
-
-    if_stat >> ps->ppid;
-    if_stat >> ps->pgrp;
-    if_stat >> ps->session;
-    if_stat >> ps->tty_nr;
-    if_stat >> ps->tpgid;
-    if_stat >> ps->flags;
-    if_stat >> ps->minflt;
-    if_stat >> ps->cminflt;
-    if_stat >> ps->cmajflt;
-    if_stat >> ps->utime;
-    if_stat >> ps->stime;
-    if_stat >> ps->cutime;
-    if_stat >> ps->cstime;
-    if_stat >> ps->priority;
-    if_stat >> ps->nice;
-    if_stat >> ps->num_threads;
-    if_stat >> ps->itrealvalue;
-    if_stat >> ps->starttime;
-    if_stat >> ps->vsize;
-    if_stat >> ps->rss;
-    if_stat >> ps->rsslim;
-    if_stat >> ps->startcode;
-    if_stat >> ps->endcode;
-    if_stat >> ps->startstack;
-    if_stat >> ps->kstkesp;
-    if_stat >> ps->kstkeip;
-    if_stat >> ps->signal;
-    if_stat >> ps->blocked;
-    if_stat >> ps->siginore;
-    if_stat >> ps->sigcatch;
-    if_stat >> ps->wchan;
-    if_stat >> ps->nswap;
-    if_stat >> ps->cnswap;
-    if_stat >> ps->exit_signal;
-    if_stat >> ps->processor;
-    if_stat >> ps->rt_priority;
-    if_stat >> ps->policy;
-    if_stat >> ps->delayacct_blkio_ticks;
-    if_stat >> ps->guest_time;
-    if_stat >> ps->cguest_time;
-    if_stat >> ps->start_data;
-    if_stat >> ps->end_data;
-    if_stat >> ps->start_brk;
-    if_stat >> ps->arg_start;
-    if_stat >> ps->arg_end;
-    if_stat >> ps->env_start;
-    if_stat >> ps->env_end;
-    if_stat >> ps->exit_code;
-
-    if_stat.close();
-}
-
-std::vector<ProcessInfo> ProcessList()
-{
-    std::vector<ProcessInfo> process_list;
-    DIR* proc = NULL;
-    if ((proc = opendir("/proc")) != NULL)
-    {
-        struct dirent* ent = NULL;
-        while ((ent = readdir(proc)) != NULL)
+        try {
+            struct process_info_t pinfo;
+            getProcess(pid, &pinfo);
+            process_list.push_back(pinfo);
+        } catch (std::string e)
         {
-            struct stat fileinfo;
-            std::string entry_path = "/proc/" + std::string(ent->d_name);
-            if (stat(entry_path.c_str(), &fileinfo) == 0)
-            {
-                // if is_directory and is_digit
-                if (S_ISDIR(fileinfo.st_mode) && std::regex_match(ent->d_name, std::regex("\\d+")))
-                {
-                    int pid = std::stoi(ent->d_name);
-                    ProcessInfo ps;
-                    try
-                    {
-                        getProcess(pid, &ps);
-                    }
-                    catch (std::string& e)
-                    {
-                        continue;
-                    }
-                    process_list.push_back(ps);
-                }
-            }
+            continue;
         }
+
     }
     return process_list;
 }
+
 
 // Network
 std::vector<unix_socket_t> getSocketUNIX()

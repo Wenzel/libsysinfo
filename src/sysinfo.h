@@ -80,7 +80,7 @@ struct io_stat
 
 };
 
-typedef struct {
+struct process_info_t {
 
   /** The Process ID */
     pid_t pid;
@@ -296,14 +296,18 @@ typedef struct {
     /** root fileystem */
     std::string root;
 
-} ProcessInfo;
+    /** fs **/
+    std::unordered_map<int, std::string> fds;
+
+};
+
 
 std::vector<cpu_info_t> readCPUInfo();
-
 int getNbCPUs();
 int getNbCores();
 int processCount();
-std::vector<ProcessInfo> ProcessList();
+std::vector<process_info_t> ProcessList();
+struct process_info_t getProcessDetail(pid_t pid);
 
 
 // network
@@ -326,7 +330,7 @@ enum socket_state {
     TCP_MAX_STATES	/* Leave at the end! */
 };
 
-typedef struct
+struct unix_socket_t
 {
     std::string num;
     int ref_count;
@@ -336,9 +340,9 @@ typedef struct
     enum socket_state state;
     int inode;
     std::string path;
-} unix_socket_t;
+};
 
-typedef struct
+struct tcp_socket_t
 {
     int num;
     std::string local_address;
@@ -352,7 +356,7 @@ typedef struct
     int tm_when;
     int retrnsmt;
     int uid;
-} tcp_socket_t;
+};
 
-std::vector<unix_socket_t> getSocketUNIX();
-std::vector<tcp_socket_t> getSocketTCP();
+std::vector<struct unix_socket_t> getSocketUNIX();
+std::vector<struct tcp_socket_t> getSocketTCP();
