@@ -418,6 +418,100 @@ struct process_info_t getProcessDetail(pid_t pid)
         }
     }
 
+    // read limits
+    std::ifstream if_limits(process_path + "/limits");
+    if (if_limits.is_open())
+    {
+        // line sample
+        // Max cpu time              unlimited            unlimited            seconds
+        std::string line;
+        std::getline(if_limits, line); // skip first line
+        while (std::getline(if_limits, line))
+        {
+            std::regex regex("^Max\\s(.*)\\s+(unlimited|[[:digit:]]+)\\s+(unlimited|[[:digit:]]+).*$");
+            std::smatch match;
+            if (std::regex_match(line, match, regex))
+            {
+                if (match.size() == 3 + 1)
+                {
+                    int soft_lmt;
+                    int hard_lmt;
+                    (match[2] == "unlimited") ? soft_lmt = -1 : soft_lmt = std::stoi(match[2]);
+                    (match[3] == "unlimited") ? hard_lmt = -1 : hard_lmt = std::stoi(match[3]);
+                    std::string field_name = match[1];
+                    boost::trim(field_name);
+                    if (field_name == "cpu time")
+                    {
+                        pinfo.limits.cpu_time_soft_lmt = soft_lmt;
+                        pinfo.limits.cpu_time_hard_lmt = hard_lmt;
+                    } else if (field_name == "file size")
+                    {
+                        pinfo.limits.file_size_soft_lmt = soft_lmt;
+                        pinfo.limits.file_size_hard_lmt = hard_lmt;
+                    } else if (field_name == "data size")
+                    {
+                        pinfo.limits.data_size_soft_lmt = soft_lmt;
+                        pinfo.limits.data_size_hard_lmt = hard_lmt;
+                    } else if (field_name == "stack size")
+                    {
+                        pinfo.limits.stack_size_soft_lmt = soft_lmt;
+                        pinfo.limits.stack_size_hard_lmt = hard_lmt;
+                    } else if (field_name == "core file size")
+                    {
+                        pinfo.limits.core_file_size_soft_lmt = soft_lmt;
+                        pinfo.limits.core_file_size_hard_lmt = hard_lmt;
+                    } else if (field_name == "resident set")
+                    {
+                        pinfo.limits.resident_set_soft_lmt = soft_lmt;
+                        pinfo.limits.resident_set_hard_lmt = hard_lmt;
+                    } else if (field_name == "processes")
+                    {
+                        std::cout << "<" << soft_lmt << ">" << std::endl;
+                        pinfo.limits.processes_soft_lmt = soft_lmt;
+                        pinfo.limits.processes_hard_lmt = hard_lmt;
+                    } else if (field_name == "open files")
+                    {
+                        pinfo.limits.open_files_soft_lmt = soft_lmt;
+                        pinfo.limits.open_files_hard_lmt = hard_lmt;
+                    } else if (field_name == "locked memory")
+                    {
+                        pinfo.limits.locked_memory_soft_lmt = soft_lmt;
+                        pinfo.limits.locked_memory_hard_lmt = hard_lmt;
+                    } else if (field_name == "address space")
+                    {
+                        pinfo.limits.address_space_soft_lmt = soft_lmt;
+                        pinfo.limits.address_space_hard_lmt = hard_lmt;
+                    } else if (field_name == "file locks")
+                    {
+                        pinfo.limits.file_locks_soft_lmt = soft_lmt;
+                        pinfo.limits.file_locks_hard_lmt = hard_lmt;
+                    } else if (field_name == "pending signals")
+                    {
+                        pinfo.limits.pending_signals_soft_lmt = soft_lmt;
+                        pinfo.limits.pending_signals_hard_lmt = hard_lmt;
+                    } else if (field_name == "msgqueue size")
+                    {
+                        pinfo.limits.msgqueue_size_soft_lmt = soft_lmt;
+                        pinfo.limits.msgqueue_size_hard_lmt = hard_lmt;
+                    } else if (field_name == "nice priority")
+                    {
+                        pinfo.limits.nice_priority_soft_lmt = soft_lmt;
+                        pinfo.limits.nice_priority_hard_lmt = hard_lmt;
+                    } else if (field_name == "realtime priority")
+                    {
+                        pinfo.limits.realtime_priority_soft_lmt = soft_lmt;
+                        pinfo.limits.realtime_priority_hard_lmt = hard_lmt;
+                    } else if (field_name == "realtime timeout")
+                    {
+                        pinfo.limits.realtime_timeout_soft_lmt = soft_lmt;
+                        pinfo.limits.realtime_timeout_hard_lmt = hard_lmt;
+                    }
+                }
+            }
+        }
+    }
+
+
     return pinfo;
 }
 

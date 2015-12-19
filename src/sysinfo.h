@@ -109,6 +109,44 @@ struct memory_mapping_t
     std::string pathname;
 };
 
+struct limits_t
+{
+    long cpu_time_soft_lmt;
+    long file_size_soft_lmt;
+    long data_size_soft_lmt;
+    long stack_size_soft_lmt;
+    long core_file_size_soft_lmt;
+    long resident_set_soft_lmt;
+    long processes_soft_lmt;
+    long open_files_soft_lmt;
+    long locked_memory_soft_lmt;
+    long address_space_soft_lmt;
+    long file_locks_soft_lmt;
+    long pending_signals_soft_lmt;
+    long msgqueue_size_soft_lmt;
+    long nice_priority_soft_lmt;
+    long realtime_priority_soft_lmt;
+    long realtime_timeout_soft_lmt;
+
+    long cpu_time_hard_lmt;
+    long file_size_hard_lmt;
+    long data_size_hard_lmt;
+    long stack_size_hard_lmt;
+    long core_file_size_hard_lmt;
+    long resident_set_hard_lmt;
+    long processes_hard_lmt;
+    long open_files_hard_lmt;
+    long locked_memory_hard_lmt;
+    long address_space_hard_lmt;
+    long file_locks_hard_lmt;
+    long pending_signals_hard_lmt;
+    long msgqueue_size_hard_lmt;
+    long nice_priority_hard_lmt;
+    long realtime_priority_hard_lmt;
+    long realtime_timeout_hard_lmt;
+
+};
+
 struct process_info_t {
 
   /** The Process ID */
@@ -335,6 +373,9 @@ struct process_info_t {
 
     /** maps **/
     std::vector<struct memory_mapping_t> maps;
+
+    /** limits **/
+    struct limits_t limits;
 };
 
 
