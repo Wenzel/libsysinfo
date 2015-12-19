@@ -36,7 +36,7 @@ MainWindow::MainWindow(QWidget *parent) :
     model->setHorizontalHeaderItem(2, new QStandardItem(QString("Command Line")));
 
 
-    ui->tableView->setModel(model);
+
     updateModel();
 }
 
@@ -53,8 +53,8 @@ void MainWindow::updateModel()
         for (int j = 0; j < model->columnCount(); j++)
             delete model->takeItem(i, j);
 
-    auto proc_list = ProcessList();
-    for (int i = 0; i < proc_list.size(); i++)
+    std::vector<struct process_info_t> proc_list = processList();
+    for (unsigned int i = 0; i < proc_list.size(); i++)
     {
         model->setItem(i, 0, new QStandardItem(QString::number(proc_list[i].pid)));
         model->setItem(i, 1, new QStandardItem(QString::fromStdString(proc_list[i].name)));
@@ -63,8 +63,6 @@ void MainWindow::updateModel()
             cmdline << QString::fromStdString(arg);
         model->setItem(i, 2, new QStandardItem(cmdline.join(' ')));
     }
-
-    ui->tableView->update();
 }
 
 void MainWindow::timerEvent(QTimerEvent *event)

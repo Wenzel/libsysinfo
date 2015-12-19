@@ -16,6 +16,7 @@ int main(int argc, char *argv[])
             std::cout << pinfo.pid << std::endl;
         }
     }
+    // get first process owned by the user
     struct process_info_t pinfo = getProcessDetail(1);
     std::cout << "details for PID : 1" << std::endl;
     std::cout << "fd : " << pinfo.fds.size() << std::endl;
@@ -33,12 +34,12 @@ int main(int argc, char *argv[])
     std::cout << "nbCores " << getNbCores() << std::endl;
 
     std::cout << "testing unix sockets" << std::endl;
-    std::vector<unix_socket_t> unix_socket_list = getSocketUNIX();
+    std::vector<struct unix_socket_t> unix_socket_list = getSocketUNIX();
     for (struct unix_socket_t unix_sock : unix_socket_list)
         std::cout << "path: " << unix_sock.path << std::endl;
 
     std::cout << "testing tcp sockets" << std::endl;
-    std::vector<tcp_socket_t> tcp_socket_list = getSocketTCP();
+    std::vector<struct tcp_socket_t> tcp_socket_list = getSocketTCP();
     for (struct tcp_socket_t tcp_sock : tcp_socket_list)
     {
         std::cout << tcp_sock.local_address << ":" << tcp_sock.local_port << " " << tcp_sock.rem_address << ":" << tcp_sock.rem_port << std::endl;

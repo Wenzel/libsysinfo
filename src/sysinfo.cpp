@@ -388,9 +388,9 @@ struct process_info_t getProcessDetail(pid_t pid)
 
 
 // Network
-std::vector<unix_socket_t> getSocketUNIX()
+std::vector<struct unix_socket_t> getSocketUNIX()
 {
-    std::vector<unix_socket_t> unix_socket_list;
+    std::vector<struct unix_socket_t> unix_socket_list;
     std::ifstream if_unix("/proc/net/unix");
     if (if_unix.is_open())
     {
@@ -405,7 +405,7 @@ std::vector<unix_socket_t> getSocketUNIX()
             std::smatch match;
             if (std::regex_match(line, match, regex))
             {
-                unix_socket_t socket;
+                struct unix_socket_t socket;
                 if (match.size() == 8 + 1) // first match represents whole line
                 {
                     socket.num = match[1]; // TODO xdigit
@@ -425,9 +425,9 @@ std::vector<unix_socket_t> getSocketUNIX()
     return unix_socket_list;
 }
 
-std::vector<tcp_socket_t> getSocketTCP()
+std::vector<struct tcp_socket_t> getSocketTCP()
 {
-    std::vector<tcp_socket_t> tcp_socket_list;
+    std::vector<struct tcp_socket_t> tcp_socket_list;
     std::ifstream if_tcp("/proc/net/tcp");
     if (if_tcp.is_open())
     {
@@ -442,7 +442,7 @@ std::vector<tcp_socket_t> getSocketTCP()
             std::smatch match;
             if (std::regex_match(line, match, regex))
             {
-                tcp_socket_t socket;
+                struct tcp_socket_t socket;
                 if (match.size() == 5 + 1) // first match represents whole line
                 {
                     struct in_addr addr;

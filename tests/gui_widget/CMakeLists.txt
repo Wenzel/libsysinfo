@@ -1,6 +1,6 @@
 include_directories(${CMAKE_SOURCE_DIR}/src)
 
-find_package(Qt5Widgets)
+find_package(Qt5 REQUIRED COMPONENTS Widgets)
 
 SET(CMAKE_AUTOMOC ON)
 SET(CMAKE_AUTOUIC ON)
