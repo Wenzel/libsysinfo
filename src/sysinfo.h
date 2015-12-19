@@ -85,6 +85,28 @@ struct cgroup_hierarchy_t
     int hierarchy_id;
     std::vector<std::string> subsystems;
     std::string cgroup;
+
+};
+
+enum mapping_type
+{
+    shared,
+    priv
+};
+
+struct memory_mapping_t
+{
+    std::string address_from;
+    std::string address_to;
+    bool perm_read;
+    bool perm_write;
+    bool perm_execute;
+    enum mapping_type type;
+    int offset;
+    int dev_major;
+    int dev_minor;
+    long inode;
+    std::string pathname;
 };
 
 struct process_info_t {
@@ -311,6 +333,8 @@ struct process_info_t {
     /** cgroup **/
     std::vector<struct cgroup_hierarchy_t> cgroups;
 
+    /** maps **/
+    std::vector<struct memory_mapping_t> maps;
 };
 
 

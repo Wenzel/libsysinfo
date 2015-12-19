@@ -383,6 +383,41 @@ struct process_info_t getProcessDetail(pid_t pid)
             pinfo.cgroups.push_back(cgroup);
         }
     }
+
+    // read maps
+    std::ifstream if_maps(process_path + "/maps");
+    if (if_maps.is_open())
+    {
+        // line sample
+        // 00400000-00452000 r-xp 00000000 08:02 173521      /usr/bin/dbus-daemon
+        std::string line;
+        while (std::getline(if_maps, line))
+        {
+            std::regex regex("^([[:xdigit:]]+)-([[:xdigit:]]+)\\s([r-])([w-])([x-])([sp])\\s([[:xdigit:]]+)\\s([[:digit:]]+):([[:digit:]]+)\\s([[:digit:]]+)\\s+(.*)$");
+            std::smatch match;
+            if (std::regex_match(line, match, regex))
+            {
+                if (match.size() == 11 + 1)
+                {
+                    struct memory_mapping_t region;
+                    region.address_from = match[1];
+                    region.address_to = match[2];
+                    (match[3] == "r") ? region.perm_read = true : region.perm_read = false;
+                    (match[4] == "w") ? region.perm_write = true : region.perm_write = false;
+                    (match[5] == "x") ? region.perm_execute = true : region.perm_execute = false;
+                    (match[6] == "p") ? region.type = priv : region.type = shared;
+                    region.offset = std::stol(match[7]);
+                    region.dev_major = std::stoi(match[8]);
+                    region.dev_minor = std::stoi(match[9]);
+                    region.inode = std::stol(match[10]);
+                    region.pathname = match[11];
+
+                    pinfo.maps.push_back(region);
+                }
+            }
+        }
+    }
+
     return pinfo;
 }
 
