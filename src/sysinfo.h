@@ -296,6 +296,8 @@ struct process_info_t {
     /** root fileystem */
     std::string root;
 
+    // details
+
     /** fs **/
     std::unordered_map<int, std::string> fds;
 
@@ -306,7 +308,7 @@ std::vector<cpu_info_t> readCPUInfo();
 int getNbCPUs();
 int getNbCores();
 int processCount();
-std::vector<process_info_t> ProcessList();
+std::vector<process_info_t> processList();
 struct process_info_t getProcessDetail(pid_t pid);
 
 

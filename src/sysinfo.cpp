@@ -1,10 +1,6 @@
 #include <algorithm>
 #include <iostream>
-#include <dirent.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <unistd.h>
-#include <limits.h>
+#include <boost/filesystem.hpp>
 
 #include "sysinfo.h"
 
@@ -40,21 +36,17 @@ static std::vector<std::string> split(const std::string &s, char delim, std::vec
 static std::vector<int> getProcessList()
 {
     std::vector<int> process_pid_list;
-    DIR* proc;
-    if ((proc = opendir("/proc")) != NULL)
+    boost::filesystem::path proc_path("/proc");
+    boost::filesystem::directory_iterator end_itr;
+    for (boost::filesystem::directory_iterator itr(proc_path);
+         itr != end_itr;
+         ++itr)
     {
-        struct dirent* ent;
-        while ((ent = readdir(proc)) != NULL)
+        if (boost::filesystem::is_directory(itr->status())
+                && std::regex_match(itr->path().filename().string(), std::regex("\\d+")))
         {
-            struct stat fileinfo;
-            std::string entry_path = "/proc/" + std::string(ent->d_name);
-            if (stat(entry_path.c_str(), &fileinfo) == 0
-                    && S_ISDIR(fileinfo.st_mode)
-                    && std::regex_match(ent->d_name, std::regex("\\d+")))
-            {
-                int pid = std::stoi(ent->d_name);
-                process_pid_list.push_back(pid);
-            }
+            int pid = std::stoi(itr->path().filename().string());
+            process_pid_list.push_back(pid);
         }
     }
     return process_pid_list;
@@ -74,12 +66,8 @@ static void getProcess(int pid, struct process_info_t* pinfo)
 
     // read cwd
     // cwd is a symlink to the process's current working directory
-    char buff[PATH_MAX];
-    std::string cwd_path = process_path + "/cwd";
-    ssize_t len = readlink(cwd_path.c_str(), buff, sizeof(buff) - 1);
-    if (len == -1)
-        throw std::string("Exception while reading /proc/<pid>/cwd");
-    pinfo->cwd = std::string(buff);
+    boost::system::error_code ec;
+    pinfo->cwd = boost::filesystem::read_symlink(process_path + "cwd", ec).string();
 
     // read environ
     std::ifstream if_environ(process_path + "environ");
@@ -99,12 +87,7 @@ static void getProcess(int pid, struct process_info_t* pinfo)
     // read exe
     // this file is a symbolic link containing the actual
     // pathname of the executed command
-    std::string exe_path = process_path + "/exe";
-    len = readlink(exe_path.c_str(), buff, sizeof(buff) - 1);
-    if (len == -1) // some process like kthreadd do not have an executable
-        pinfo->exe = "";
-    else
-        pinfo->exe = std::string(buff);
+    pinfo->exe = boost::filesystem::read_symlink(process_path + "exe", ec).string();
 
     // read io
     std::ifstream if_io(process_path + "io");
@@ -137,12 +120,7 @@ static void getProcess(int pid, struct process_info_t* pinfo)
 
     // read root
     // root is a symlink to the process's filesystem root (chroot)
-    std::string root_path = process_path + "/root";
-    len = readlink(root_path.c_str(), buff, sizeof(buff) - 1);
-    if (len == -1)
-        throw std::string("Exception while reading /proc/<pid>/root");
-
-    pinfo->root = std::string(buff);
+    pinfo->root = boost::filesystem::read_symlink(process_path + "root", ec).string();
 
     // read stat
     std::ifstream if_stat(process_path + "stat");
@@ -354,7 +332,7 @@ int processCount()
 
 }
 
-std::vector<struct process_info_t> ProcessList()
+std::vector<struct process_info_t> processList()
 {
     std::vector<struct process_info_t> process_list;
     std::vector<int> process_pid_list = getProcessList();
@@ -372,6 +350,24 @@ std::vector<struct process_info_t> ProcessList()
 
     }
     return process_list;
+}
+
+struct process_info_t getProcessDetail(pid_t pid)
+{
+    struct process_info_t pinfo;
+    getProcess(pid, &pinfo);
+
+    // read fd/*
+    boost::filesystem::path fd_dir_path("/proc/" + std::to_string(pid) + "/fd");
+    boost::filesystem::directory_iterator end_itr;
+    for (boost::filesystem::directory_iterator itr;
+         itr != end_itr;
+         ++itr)
+    {
+        boost::system::error_code ec;
+        boost::filesystem::path symlink = boost::filesystem::read_symlink(itr->path(), ec);
+        pinfo.fds[std::stoi(itr->path().filename().string())] = symlink.string();
+    }
 }
 
 
