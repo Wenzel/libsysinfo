@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <iostream>
 #include <boost/filesystem.hpp>
+#include <boost/algorithm/string.hpp>
 
 #include "sysinfo.h"
 
@@ -22,15 +23,6 @@ static inline std::string &rtrim(std::string &s) {
 // trim from both ends
 static inline std::string &trim(std::string &s) {
     return ltrim(rtrim(s));
-}
-
-static std::vector<std::string> split(const std::string &s, char delim, std::vector<std::string> &elems) {
-    std::stringstream ss(s);
-    std::string item;
-    while (std::getline(ss, item, delim)) {
-        elems.push_back(item);
-    }
-    return elems;
 }
 
 static std::vector<int> getProcessList()
@@ -357,10 +349,11 @@ struct process_info_t getProcessDetail(pid_t pid)
     struct process_info_t pinfo;
     getProcess(pid, &pinfo);
 
+    std::string process_path("/proc/" + std::to_string(pid));
     // read fd/*
-    boost::filesystem::path fd_dir_path("/proc/" + std::to_string(pid) + "/fd");
+    boost::filesystem::path fd_dir_path(process_path + "/fd");
     boost::filesystem::directory_iterator end_itr;
-    for (boost::filesystem::directory_iterator itr;
+    for (boost::filesystem::directory_iterator itr(fd_dir_path);
          itr != end_itr;
          ++itr)
     {
@@ -368,6 +361,29 @@ struct process_info_t getProcessDetail(pid_t pid)
         boost::filesystem::path symlink = boost::filesystem::read_symlink(itr->path(), ec);
         pinfo.fds[std::stoi(itr->path().filename().string())] = symlink.string();
     }
+
+    // TODO attr/*
+    // cgroup
+    std::ifstream if_cgroup(process_path + "/cgroup");
+    if (if_cgroup.is_open())
+    {
+        // sample line :
+        // 5:cpuacct,cpu,cpuset:/daemons
+        std::string line;
+        while (std::getline(if_cgroup, line))
+        {
+            struct cgroup_hierarchy_t cgroup;
+
+            std::vector<std::string> splitted;
+            boost::split(splitted, line, boost::is_any_of(":"));
+            cgroup.hierarchy_id = std::stoi(splitted[0]);
+            boost::split(cgroup.subsystems, splitted[1], boost::is_any_of(","));
+            cgroup.cgroup = splitted[2];
+
+            pinfo.cgroups.push_back(cgroup);
+        }
+    }
+    return pinfo;
 }
 
 

@@ -1,33 +1,46 @@
 #include <iostream>
 #include <sysinfo.h>
+#include <boost/algorithm/string/join.hpp>
 
 int main(int argc, char *argv[])
 {
-    for (ProcessInfo p : ProcessList())
+    for (struct process_info_t pinfo : processList())
     {
-        if (!p.cmdline.empty())
+        if (!pinfo.cmdline.empty())
         {
-            for (std::string arg : p.cmdline)
+            for (std::string arg : pinfo.cmdline)
             {
                 std::cout << arg << " ";
             }
             std::cout << std::endl;
-            std::cout << p.pid << std::endl;
+            std::cout << pinfo.pid << std::endl;
         }
     }
+    struct process_info_t pinfo = getProcessDetail(1);
+    std::cout << "details for PID : 1" << std::endl;
+    std::cout << "fd : " << pinfo.fds.size() << std::endl;
+    for (auto const &pair : pinfo.fds)
+    {
+        std::cout << pair.first << " -> " << pair.second << std::endl;
+    }
+
+    std::cout << "cgroup : " << pinfo.cgroups.size() << std::endl;
+    for (struct cgroup_hierarchy_t cgroup : pinfo.cgroups)
+        std::cout << cgroup.hierarchy_id << ", " << boost::algorithm::join(cgroup.subsystems, " ") << ", " << cgroup.cgroup << std::endl;
+
     std::cout << "nbProcess " << processCount() << std::endl;
     std::cout << "nbCPU " << getNbCPUs() << std::endl;
     std::cout << "nbCores " << getNbCores() << std::endl;
 
     std::cout << "testing unix sockets" << std::endl;
     std::vector<unix_socket_t> unix_socket_list = getSocketUNIX();
-    for (int i = 0; i < unix_socket_list.size(); i++)
-        std::cout << "path: " << unix_socket_list[i].path << std::endl;
+    for (struct unix_socket_t unix_sock : unix_socket_list)
+        std::cout << "path: " << unix_sock.path << std::endl;
 
     std::cout << "testing tcp sockets" << std::endl;
     std::vector<tcp_socket_t> tcp_socket_list = getSocketTCP();
-    for (int i = 0; i < tcp_socket_list.size(); i++)
+    for (struct tcp_socket_t tcp_sock : tcp_socket_list)
     {
-        std::cout << tcp_socket_list[i].local_address << ":" << tcp_socket_list[i].local_port << " " << tcp_socket_list[i].rem_address << ":" << tcp_socket_list[i].rem_port << std::endl;
+        std::cout << tcp_sock.local_address << ":" << tcp_sock.local_port << " " << tcp_sock.rem_address << ":" << tcp_sock.rem_port << std::endl;
     }
 }

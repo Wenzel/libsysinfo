@@ -80,6 +80,13 @@ struct io_stat
 
 };
 
+struct cgroup_hierarchy_t
+{
+    int hierarchy_id;
+    std::vector<std::string> subsystems;
+    std::string cgroup;
+};
+
 struct process_info_t {
 
   /** The Process ID */
@@ -300,6 +307,9 @@ struct process_info_t {
 
     /** fs **/
     std::unordered_map<int, std::string> fds;
+
+    /** cgroup **/
+    std::vector<struct cgroup_hierarchy_t> cgroups;
 
 };
 
