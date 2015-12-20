@@ -9,22 +9,23 @@ int main(int argc, char *argv[])
     argc = argc;
     argv = argv;
 
+    // get current pid
     pid_t pid = getpid();
-
     // get first process owned by the user
     struct process_info_t pinfo = getProcessDetail(pid);
+
+
     std::cout << "details for PID : " << pid << std::endl;
     std::cout << "fd : " << pinfo.fds.size() << std::endl;
     for (auto const &pair : pinfo.fds)
-    {
         std::cout << pair.first << " -> " << pair.second << std::endl;
-    }
 
     std::cout << "cgroup : " << pinfo.cgroups.size() << std::endl;
     for (struct cgroup_hierarchy_t cgroup : pinfo.cgroups)
         std::cout << cgroup.hierarchy_id << ", " << boost::algorithm::join(cgroup.subsystems, " ") << ", " << cgroup.cgroup << std::endl;
 
     std::cout << "maps : " << pinfo.maps.size() << std::endl;
+
     /*
     for (struct process_info_t pinfo : processList())
     {

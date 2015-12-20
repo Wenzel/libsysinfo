@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <iostream>
+#include <boost/regex.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string.hpp>
 
@@ -35,7 +36,7 @@ static std::vector<int> getProcessList()
          ++itr)
     {
         if (boost::filesystem::is_directory(itr->status())
-                && std::regex_match(itr->path().filename().string(), std::regex("\\d+")))
+                && boost::regex_match(itr->path().filename().string(), boost::regex("\\d+")))
         {
             int pid = std::stoi(itr->path().filename().string());
             process_pid_list.push_back(pid);
@@ -396,10 +397,10 @@ struct process_info_t getProcessDetail(pid_t pid)
         while (std::getline(if_smaps, line))
         {
             struct memory_mapping_t region;
-            std::regex regex_declare_mapping("^([[:xdigit:]]+)-([[:xdigit:]]+)\\s([r-])([w-])([x-])([sp])\\s([[:xdigit:]]+)\\s([[:digit:]]+):([[:digit:]]+)\\s([[:digit:]]+)\\s+(.*)$");
-            std::regex regex_key_value("^([[:alpha:]]+):\\s+(.*)$");
-            std::smatch match;
-            if (std::regex_match(line, match, regex_declare_mapping))
+            boost::regex regex_declare_mapping("^([[:xdigit:]]+)-([[:xdigit:]]+)\\s([r-])([w-])([x-])([sp])\\s([[:xdigit:]]+)\\s([[:digit:]]+):([[:digit:]]+)\\s([[:digit:]]+)\\s+(.*)$");
+            boost::regex regex_key_value("^([[:alpha:]]+):\\s+(.*)$");
+            boost::smatch match;
+            if (boost::regex_match(line, match, regex_declare_mapping))
             {
                 if (match.size() == 11 + 1)
                 {
@@ -418,15 +419,15 @@ struct process_info_t getProcessDetail(pid_t pid)
                     region.inode = std::stol(match[10]);
                     region.pathname = match[11];
                 }
-            } else if (std::regex_match(line, match, regex_key_value))
+            } else if (boost::regex_match(line, match, regex_key_value))
             {
                 if (match.size() == 2 + 1)
                 {
                     std::string value(match[2]);
                     boost::trim(value);
-                    std::regex regex_value("^([[:digit:]])\\s.*$");
-                    std::smatch match_value;
-                    if (std::regex_match(value, match_value, regex_value))
+                    boost::regex regex_value("^([[:digit:]])\\s.*$");
+                    boost::smatch match_value;
+                    if (boost::regex_match(value, match_value, regex_value))
                     {
                         // 4 kB
                         if (match[1] == "Size")
@@ -479,9 +480,9 @@ struct process_info_t getProcessDetail(pid_t pid)
         std::getline(if_limits, line); // skip first line
         while (std::getline(if_limits, line))
         {
-            std::regex regex("^Max\\s(.*)\\s+(unlimited|[[:digit:]]+)\\s+(unlimited|[[:digit:]]+).*$");
-            std::smatch match;
-            if (std::regex_match(line, match, regex))
+            boost::regex regex("^Max\\s(.*)\\s+(unlimited|[[:digit:]]+)\\s+(unlimited|[[:digit:]]+).*$");
+            boost::smatch match;
+            if (boost::regex_match(line, match, regex))
             {
                 if (match.size() == 3 + 1)
                 {
@@ -568,9 +569,9 @@ struct process_info_t getProcessDetail(pid_t pid)
         std::string line;
         while (std::getline(if_stack, line))
         {
-            std::regex regex("^\\[<([[:xdigit:]]+)>\\]\\s(.*)$");
-            std::smatch match;
-            if (std::regex_match(line, match, regex))
+            boost::regex regex("^\\[<([[:xdigit:]]+)>\\]\\s(.*)$");
+            boost::smatch match;
+            if (boost::regex_match(line, match, regex))
             {
                 if (match.size() == 2 + 1)
                 {
@@ -603,9 +604,9 @@ std::vector<struct unix_socket_t> getSocketUNIX()
         {
             // line sample
             // ffff8800c6110000: 00000002 00000000 00010000 0001 01 29692 @/tmp/.ICE-unix/3006
-            std::regex regex("^([[:xdigit:]]+):\\s([[:digit:]]+)\\s([[:digit:]]+)\\s([[:digit:]]+)\\s([[:digit:]]+)\\s([[:digit:]]+)\\s([[:digit:]]+)\\s(.*)$");
-            std::smatch match;
-            if (std::regex_match(line, match, regex))
+            boost::regex regex("^([[:xdigit:]]+):\\s([[:digit:]]+)\\s([[:digit:]]+)\\s([[:digit:]]+)\\s([[:digit:]]+)\\s([[:digit:]]+)\\s([[:digit:]]+)\\s(.*)$");
+            boost::smatch match;
+            if (boost::regex_match(line, match, regex))
             {
                 struct unix_socket_t socket;
                 if (match.size() == 8 + 1) // first match represents whole line
@@ -640,9 +641,9 @@ std::vector<struct tcp_socket_t> getSocketTCP()
         {
             // line sample
             //   0: 0ABCDEF:0035 00000000:0000 0A 00000000:00000000 00:00000000 00000000     0        0 29706 1 ffff8800c63f8000 100 0 0 10 0
-            std::regex regex("^\\s+([[:digit:]]+):\\s([[:xdigit:]]+):([[:xdigit:]]+)\\s([[:xdigit:]]+):([[:xdigit:]]+).*$");
-            std::smatch match;
-            if (std::regex_match(line, match, regex))
+            boost::regex regex("^\\s+([[:digit:]]+):\\s([[:xdigit:]]+):([[:xdigit:]]+)\\s([[:xdigit:]]+):([[:xdigit:]]+).*$");
+            boost::smatch match;
+            if (boost::regex_match(line, match, regex))
             {
                 struct tcp_socket_t socket;
                 if (match.size() == 5 + 1) // first match represents whole line
