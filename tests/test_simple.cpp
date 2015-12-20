@@ -1,5 +1,7 @@
 #include <iostream>
 #include <sysinfo.h>
+#include <sys/types.h>
+#include <unistd.h>
 #include <boost/algorithm/string/join.hpp>
 
 int main(int argc, char *argv[])
@@ -7,10 +9,12 @@ int main(int argc, char *argv[])
     argc = argc;
     argv = argv;
 
+    // get current pid
+    pid_t pid = getpid();
     // get first process owned by the user
-    struct process_info_t pinfo = getProcessDetail(1);
+    struct process_info_t pinfo = getProcessDetail(pid);
 
-    std::cout << "details for PID : 1" << std::endl;
+    std::cout << "details for PID : " << pid << std::endl;
     std::cout << "fd : " << pinfo.fds.size() << std::endl;
     for (auto const &pair : pinfo.fds)
     {
