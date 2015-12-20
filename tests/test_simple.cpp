@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
 
     std::cout << "maps : " << pinfo.maps.size() << std::endl;
 
-    /*
+
     for (struct process_info_t pinfo : processList())
     {
         if (!pinfo.cmdline.empty())
@@ -55,5 +55,4 @@ int main(int argc, char *argv[])
     {
         std::cout << tcp_sock.local_address << ":" << tcp_sock.local_port << " " << tcp_sock.rem_address << ":" << tcp_sock.rem_port << std::endl;
     }
-    */
 }
