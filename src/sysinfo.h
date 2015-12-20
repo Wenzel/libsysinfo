@@ -147,6 +147,12 @@ struct limits_t
 
 };
 
+struct stack_func_t
+{
+    std::string address;
+    std::string function;
+};
+
 struct process_info_t {
 
   /** The Process ID */
@@ -376,6 +382,9 @@ struct process_info_t {
 
     /** limits **/
     struct limits_t limits;
+
+    /** stack **/
+    std::vector<struct stack_func_t> stack;
 };
 
 

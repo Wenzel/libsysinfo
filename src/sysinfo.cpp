@@ -466,7 +466,6 @@ struct process_info_t getProcessDetail(pid_t pid)
                         pinfo.limits.resident_set_hard_lmt = hard_lmt;
                     } else if (field_name == "processes")
                     {
-                        std::cout << "<" << soft_lmt << ">" << std::endl;
                         pinfo.limits.processes_soft_lmt = soft_lmt;
                         pinfo.limits.processes_hard_lmt = hard_lmt;
                     } else if (field_name == "open files")
@@ -506,6 +505,29 @@ struct process_info_t getProcessDetail(pid_t pid)
                         pinfo.limits.realtime_timeout_soft_lmt = soft_lmt;
                         pinfo.limits.realtime_timeout_hard_lmt = hard_lmt;
                     }
+                }
+            }
+        }
+    }
+
+    // read stack
+    std::ifstream if_stack(process_path + "/stack");
+    if (if_stack.is_open())
+    {
+        std::string line;
+        while (std::getline(if_stack, line))
+        {
+            std::regex regex("^\\[<([[:xdigit:]]+)>\\]\\s(.*)$");
+            std::smatch match;
+            if (std::regex_match(line, match, regex))
+            {
+                if (match.size() == 2 + 1)
+                {
+                    struct stack_func_t func;
+                    func.address = match[1];
+                    func.function = match[2];
+
+                    pinfo.stack.push_back(func);
                 }
             }
         }
