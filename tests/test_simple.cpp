@@ -9,6 +9,7 @@ int main(int argc, char *argv[])
 
     // get first process owned by the user
     struct process_info_t pinfo = getProcessDetail(1);
+
     std::cout << "details for PID : 1" << std::endl;
     std::cout << "fd : " << pinfo.fds.size() << std::endl;
     for (auto const &pair : pinfo.fds)
@@ -21,6 +22,7 @@ int main(int argc, char *argv[])
         std::cout << cgroup.hierarchy_id << ", " << boost::algorithm::join(cgroup.subsystems, " ") << ", " << cgroup.cgroup << std::endl;
 
     std::cout << "maps : " << pinfo.maps.size() << std::endl;
+
     /*
     for (struct process_info_t pinfo : processList())
     {

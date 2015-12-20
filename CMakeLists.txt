@@ -16,7 +16,7 @@ project(sysinfo CXX)
 #-----------------------------------------------------------------------------
 #                              DEPENDENCIES
 #-----------------------------------------------------------------------------
-find_package(Boost REQUIRED COMPONENTS system filesystem)
+find_package(Boost REQUIRED COMPONENTS system filesystem regex)
 set(ALL_INCLUDES ${Boost_INCLUDE_DIRS})
 set(ALL_LIBS ${Boost_LIBRARIES})
 
