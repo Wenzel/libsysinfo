@@ -384,22 +384,28 @@ struct process_info_t getProcessDetail(pid_t pid)
         }
     }
 
-    // read maps
-    std::ifstream if_maps(process_path + "/maps");
-    if (if_maps.is_open())
+    // read smaps
+    std::ifstream if_smaps(process_path + "/smaps");
+    if (if_smaps.is_open())
     {
         // line sample
         // 00400000-00452000 r-xp 00000000 08:02 173521      /usr/bin/dbus-daemon
+        // and
+        // Shared_Clean:          0 kB
         std::string line;
-        while (std::getline(if_maps, line))
+        while (std::getline(if_smaps, line))
         {
-            std::regex regex("^([[:xdigit:]]+)-([[:xdigit:]]+)\\s([r-])([w-])([x-])([sp])\\s([[:xdigit:]]+)\\s([[:digit:]]+):([[:digit:]]+)\\s([[:digit:]]+)\\s+(.*)$");
+            struct memory_mapping_t region;
+            std::regex regex_declare_mapping("^([[:xdigit:]]+)-([[:xdigit:]]+)\\s([r-])([w-])([x-])([sp])\\s([[:xdigit:]]+)\\s([[:digit:]]+):([[:digit:]]+)\\s([[:digit:]]+)\\s+(.*)$");
+            std::regex regex_key_value("^([[:alpha:]]+):\\s+(.*)$");
             std::smatch match;
-            if (std::regex_match(line, match, regex))
+            if (std::regex_match(line, match, regex_declare_mapping))
             {
                 if (match.size() == 11 + 1)
                 {
-                    struct memory_mapping_t region;
+                    pinfo.maps.push_back(memory_mapping_t());
+                    region = pinfo.maps.back();
+
                     region.address_from = match[1];
                     region.address_to = match[2];
                     (match[3] == "r") ? region.perm_read = true : region.perm_read = false;
@@ -411,10 +417,55 @@ struct process_info_t getProcessDetail(pid_t pid)
                     region.dev_minor = std::stoi(match[9]);
                     region.inode = std::stol(match[10]);
                     region.pathname = match[11];
+                }
+            } else if (std::regex_match(line, match, regex_key_value))
+            {
+                if (match.size() == 2 + 1)
+                {
+                    std::string value(match[2]);
+                    boost::trim(value);
+                    std::regex regex_value("^([[:digit:]])\\s.*$");
+                    std::smatch match_value;
+                    if (std::regex_match(value, match_value, regex_value))
+                    {
+                        // 4 kB
+                        if (match[1] == "Size")
+                            region.size = std::stoi(match_value[1]);
+                        else if (match[1] == "Rss")
+                            region.rss = std::stoi(match_value[1]);
+                        else if (match[1] == "Pss")
+                            region.pss = std::stoi(match_value[1]);
+                        else if (match[1] == "Shared_Clean")
+                            region.shared_clean = std::stoi(match_value[1]);
+                        else if (match[1] == "Shared_Dirty")
+                            region.shared_dirty = std::stoi(match_value[1]);
+                        else if (match[1] == "Private_Clean")
+                            region.private_clean = std::stoi(match_value[1]);
+                        else if (match[1] == "Private_Dirty")
+                            region.private_dirty = std::stoi(match_value[1]);
+                        else if (match[1] == "Referenced")
+                            region.referenced = std::stoi(match_value[1]);
+                        else if (match[1] == "Anonymous")
+                            region.anonymous = std::stoi(match_value[1]);
+                        else if (match[1] == "AnonHugePages")
+                            region.anonhugepages = std::stoi(match_value[1]);
+                        else if (match[1] == "Swap")
+                            region.swap = std::stoi(match_value[1]);
+                        else if (match[1] == "KernelPageSize")
+                            region.kernelpagesize = std::stoi(match_value[1]);
+                        else if (match[1] == "MMUPageSize")
+                            region.mmupagesize = std::stoi(match_value[1]);
+                        else if (match[1] == "Locked")
+                            region.locked = std::stoi(match_value[1]);
 
-                    pinfo.maps.push_back(region);
+                    } else
+                    {
+                        // VmFlags special case
+                        boost::split(region.vmflags, value, boost::is_any_of(" "));
+                    }
                 }
             }
+
         }
     }
 

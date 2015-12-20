@@ -67,5 +67,6 @@ void MainWindow::updateModel()
 
 void MainWindow::timerEvent(QTimerEvent *event)
 {
+    event = event;
     updateModel();
 }

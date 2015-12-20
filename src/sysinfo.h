@@ -107,6 +107,23 @@ struct memory_mapping_t
     int dev_minor;
     long inode;
     std::string pathname;
+    // smaps additional fields
+    int size;
+    int rss;
+    int pss;
+    int shared_clean;
+    int shared_dirty;
+    int private_clean;
+    int private_dirty;
+    int referenced;
+    int anonymous;
+    int anonhugepages;
+    int swap;
+    int kernelpagesize;
+    int mmupagesize;
+    int locked;
+    std::vector<std::string> vmflags;
+
 };
 
 struct limits_t

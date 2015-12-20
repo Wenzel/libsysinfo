@@ -4,6 +4,9 @@
 
 int main(int argc, char *argv[])
 {
+    argc = argc;
+    argv = argv;
+
     // get first process owned by the user
     struct process_info_t pinfo = getProcessDetail(1);
     std::cout << "details for PID : 1" << std::endl;
