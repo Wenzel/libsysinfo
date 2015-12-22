@@ -384,6 +384,7 @@ struct process_info_t getProcessDetail(pid_t pid)
             pinfo.cgroups.push_back(cgroup);
         }
     }
+    if_cgroup.close();
 
     // read smaps
     std::ifstream if_smaps(process_path + "/smaps");
@@ -469,6 +470,7 @@ struct process_info_t getProcessDetail(pid_t pid)
 
         }
     }
+    if_smaps.close();
 
     // read limits
     std::ifstream if_limits(process_path + "/limits");
@@ -561,6 +563,7 @@ struct process_info_t getProcessDetail(pid_t pid)
             }
         }
     }
+    if_limits.close();
 
     // read stack
     std::ifstream if_stack(process_path + "/stack");
@@ -584,6 +587,7 @@ struct process_info_t getProcessDetail(pid_t pid)
             }
         }
     }
+    if_stack.close();
 
 
     return pinfo;
@@ -625,6 +629,8 @@ std::vector<struct unix_socket_t> getSocketUNIX()
             }
         }
     }
+    if_unix.close();
+
     return unix_socket_list;
 }
 
@@ -664,5 +670,7 @@ std::vector<struct tcp_socket_t> getSocketTCP()
             }
         }
     }
+    if_tcp.close();
+
     return tcp_socket_list;
 }
