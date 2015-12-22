@@ -10,24 +10,34 @@ ApplicationWindow {
     width: Screen.width * 0.7
     height: Screen.height * 0.7
 
-    TableView {
+    TabView {
+        id: tab
         anchors.fill: parent
-        TableViewColumn {
-            role: "pid"
-            title: "PID"
-            width: 100
+
+        Tab {
+            id: procexp
+            title: "Process Explorer"
+
+            TableView {
+                anchors.fill: parent
+                TableViewColumn {
+                    role: "pid"
+                    title: "PID"
+                    width: 100
+                }
+                TableViewColumn {
+                    role: "name"
+                    title: "Name"
+                    width: 200
+                }
+                TableViewColumn {
+                    role: "cmdline"
+                    title: "Command line"
+                    width: procexp.width
+                }
+                model: myModel
+            }
         }
-        TableViewColumn {
-            role: "name"
-            title: "Name"
-            width: 200
-        }
-        TableViewColumn {
-            role: "cmdline"
-            title: "Command line"
-            width: app.width
-        }
-        model: myModel
     }
 }
 
