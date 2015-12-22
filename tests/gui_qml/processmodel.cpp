@@ -3,6 +3,7 @@
 #include <vector>
 #include <iterator>
 #include <algorithm>
+#include <QDebug>
 
 #include "processmodel.h"
 
@@ -21,15 +22,9 @@ void ProcessModel::timerEvent(QTimerEvent *event)
 
 void ProcessModel::updateModel()
 {
-    m_processes.clear();
-
     beginResetModel();
-    // get data
-    std::vector<struct process_info_t> processes = processList();
 
-    // update model (insert in reversed order to see new processes)
-    for (int i = processes.size() - 1; i >= 0; i--)
-        m_processes.append(processes[i]);
+    m_processes = processList();
 
     endResetModel();
 }
@@ -44,11 +39,11 @@ QHash<int, QByteArray> ProcessModel::roleNames() const {
 
 int ProcessModel::rowCount(const QModelIndex & parent) const {
     Q_UNUSED(parent);
-    return m_processes.count();
+    return m_processes.size();
 }
 
 QVariant ProcessModel::data(const QModelIndex & index, int role) const {
-    if (index.row() < 0 || index.row() >= m_processes.count())
+    if (index.row() < 0 || index.row() >= m_processes.size())
         return QVariant();
 
     const struct process_info_t &process = m_processes[index.row()];
@@ -68,9 +63,9 @@ QVariant ProcessModel::data(const QModelIndex & index, int role) const {
 
     return QVariant();
 }
-/*
+
+
 QVariant ProcessModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-
+    qDebug() << "Hello World!";
 }
-*/
