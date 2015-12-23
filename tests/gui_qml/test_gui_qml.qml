@@ -48,37 +48,37 @@ ApplicationWindow {
                 TableViewColumn {
                     role: "num"
                     title: "Num"
-                    width: 100
+                    width: 150
                 }
                 TableViewColumn {
                     role: "refcount"
                     title: "RefCount"
-                    width: 100
+                    width: 70
                 }
                 TableViewColumn {
                     role: "protocol"
                     title: "Protocol"
-                    width: 100
+                    width: 70
                 }
                 TableViewColumn {
                     role: "flags"
                     title: "flags"
-                    width: 100
+                    width: 70
                 }
                 TableViewColumn {
                     role: "type"
                     title: "Type"
-                    width: 100
+                    width: 50
                 }
                 TableViewColumn {
                     role: "state"
                     title: "State"
-                    width: 100
+                    width: 50
                 }
                 TableViewColumn {
                     role: "inode"
                     title: "Inode"
-                    width: 100
+                    width: 70
                 }
                 TableViewColumn {
                     role: "path"
