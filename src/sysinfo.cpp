@@ -623,7 +623,6 @@ std::vector<struct unix_socket_t> getSocketUNIX()
                     socket.state = static_cast<enum socket_state>(std::stoi(match[6]));
                     socket.inode = std::stoi(match[7]);
                     socket.path = match[8];
-                    std::cout << socket.path << std::endl;
                     unix_socket_list.push_back(socket);
                 }
             }
