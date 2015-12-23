@@ -35,7 +35,57 @@ ApplicationWindow {
                     title: "Command line"
                     width: procexp.width
                 }
-                model: myModel
+                model: process_model
+            }
+        }
+
+        Tab {
+            id: socket_unix
+            title: "Socket UNIX"
+
+            TableView {
+                anchors.fill: parent
+                TableViewColumn {
+                    role: "num"
+                    title: "Num"
+                    width: 100
+                }
+                TableViewColumn {
+                    role: "refcount"
+                    title: "RefCount"
+                    width: 100
+                }
+                TableViewColumn {
+                    role: "protocol"
+                    title: "Protocol"
+                    width: 100
+                }
+                TableViewColumn {
+                    role: "flags"
+                    title: "flags"
+                    width: 100
+                }
+                TableViewColumn {
+                    role: "type"
+                    title: "Type"
+                    width: 100
+                }
+                TableViewColumn {
+                    role: "state"
+                    title: "State"
+                    width: 100
+                }
+                TableViewColumn {
+                    role: "inode"
+                    title: "Inode"
+                    width: 100
+                }
+                TableViewColumn {
+                    role: "path"
+                    title: "Path"
+                    width: socket_unix.width
+                }
+                model: socket_unix_model
             }
         }
     }
