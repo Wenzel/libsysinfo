@@ -11,7 +11,19 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    center();
 
+    timerId = startTimer(1000);
+    model = new QStandardItemModel(this);
+    model->setHorizontalHeaderItem(0, new QStandardItem(QString("PID")));
+    model->setHorizontalHeaderItem(1, new QStandardItem(QString("Name")));
+    model->setHorizontalHeaderItem(2, new QStandardItem(QString("Command Line")));
+
+    updateModel();
+}
+
+void MainWindow::center()
+{
     // size 70%
     QDesktopWidget dw;
 
@@ -28,16 +40,6 @@ MainWindow::MainWindow(QWidget *parent) :
             qApp->desktop()->availableGeometry()
         )
     );
-
-    timerId = startTimer(1000);
-    model = new QStandardItemModel(this);
-    model->setHorizontalHeaderItem(0, new QStandardItem(QString("PID")));
-    model->setHorizontalHeaderItem(1, new QStandardItem(QString("Name")));
-    model->setHorizontalHeaderItem(2, new QStandardItem(QString("Command Line")));
-
-
-
-    updateModel();
 }
 
 MainWindow::~MainWindow()
@@ -48,7 +50,6 @@ MainWindow::~MainWindow()
 
 void MainWindow::updateModel()
 {
-
     for (int i = 0; i < model->rowCount(); i++)
         for (int j = 0; j < model->columnCount(); j++)
             delete model->takeItem(i, j);

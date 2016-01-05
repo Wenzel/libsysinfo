@@ -1,5 +1,7 @@
 #include <algorithm>
 #include <iostream>
+#include <chrono>
+#include <sys/sysinfo.h>
 #include <boost/regex.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string.hpp>
@@ -8,6 +10,13 @@
 
 // Private
 
+struct old_cpu_time_t
+{
+    long long unsigned cpu_total_time;
+    long long unsigned proc_total_time;
+};
+
+static std::unordered_map<int, struct old_cpu_time_t> map_pid_usage;
 
 // trim from start
 static inline std::string &ltrim(std::string &s) {
@@ -43,6 +52,55 @@ static std::vector<int> getProcessList()
         }
     }
     return process_pid_list;
+}
+
+
+static int updateCPUUsage(int pid, struct process_info_t* pinfo)
+{
+    int cpu_usage = 0;
+
+    // read /proc/stat
+    std::ifstream if_cpu_stat("/proc/stat");
+    std::string tmp;
+    if_cpu_stat >> tmp;
+    long long unsigned user,nice,system,idle,cpu_total_time;
+    user = 0;
+    if_cpu_stat >> user;
+    if_cpu_stat >> nice;
+    if_cpu_stat >> system;
+    if_cpu_stat >> idle;
+    if_cpu_stat.close();
+    // get cpu_total_time
+    cpu_total_time = user + nice + system + idle;
+
+    // get process_total_time
+    long long unsigned process_total_time = pinfo->utime + pinfo->stime;
+    struct old_cpu_time_t old_cpu_time;
+
+
+    if (map_pid_usage.find(pid) == map_pid_usage.end())
+    {
+        // insert
+        old_cpu_time.cpu_total_time = cpu_total_time;
+        old_cpu_time.proc_total_time = process_total_time;
+        map_pid_usage[pid] = old_cpu_time;
+    }
+    else
+    {
+        // retrieve old value
+        old_cpu_time = map_pid_usage[pid];
+        long long unsigned delta_cpu_time = cpu_total_time - old_cpu_time.cpu_total_time;
+        long long unsigned delta_process_time = process_total_time - old_cpu_time.proc_total_time;
+        cpu_usage = 100 * delta_process_time / delta_cpu_time;
+        // std::cout << "dproc_time " << cpu_usage << ", dcpu_time " << delta_cpu_time << std::endl;
+
+        // update old values
+        old_cpu_time.cpu_total_time = cpu_total_time;
+        old_cpu_time.proc_total_time = process_total_time;
+        map_pid_usage[pid] = old_cpu_time;
+    }
+
+    return cpu_usage;
 }
 
 static void getProcess(int pid, struct process_info_t* pinfo)
@@ -196,11 +254,14 @@ static void getProcess(int pid, struct process_info_t* pinfo)
     if_stat >> pinfo->env_end;
     if_stat >> pinfo->exit_code;
 
+    pinfo->cpu_usage = updateCPUUsage(pid, pinfo);
+
     if_stat.close();
 }
 
 // Public API
 
+// System info
 std::vector<cpu_info_t> readCPUInfo()
 {
     std::vector<cpu_info_t> cpuinfo = std::vector<cpu_info_t>();
@@ -319,10 +380,11 @@ int getNbCores()
     return cpuinfo.size();
 }
 
+// process
+
 int processCount()
 {
     return getProcessList().size();
-
 }
 
 std::vector<struct process_info_t> processList()
@@ -345,7 +407,7 @@ std::vector<struct process_info_t> processList()
     return process_list;
 }
 
-struct process_info_t getProcessDetail(pid_t pid)
+struct process_info_t processDetail(pid_t pid)
 {
     struct process_info_t pinfo;
     getProcess(pid, &pinfo);

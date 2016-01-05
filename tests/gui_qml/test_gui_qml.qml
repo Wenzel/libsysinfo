@@ -20,6 +20,9 @@ ApplicationWindow {
 
             TableView {
                 anchors.fill: parent
+                sortIndicatorVisible: true
+                sortIndicatorColumn: 0
+                sortIndicatorOrder: Qt.DescendingOrder
                 TableViewColumn {
                     role: "pid"
                     title: "PID"
@@ -30,6 +33,12 @@ ApplicationWindow {
                     title: "Name"
                     width: 200
                 }
+                TableViewColumn {
+                    role: "cpu_usage"
+                    title: "CPU Usage"
+                    width: 100
+                }
+
                 TableViewColumn {
                     role: "cmdline"
                     title: "Command line"

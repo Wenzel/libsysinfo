@@ -8,7 +8,7 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 
-// Process
+
 
 struct cpu_info_t
 {
@@ -39,6 +39,13 @@ struct cpu_info_t
     std::string address_sizes;
     std::string power_management;
 };
+
+// System information
+std::vector<cpu_info_t> readCPUInfo();
+int getNbCPUs();
+int getNbCores();
+
+// Process
 
 enum process_status
 {
@@ -402,15 +409,15 @@ struct process_info_t {
 
     /** stack **/
     std::vector<struct stack_func_t> stack;
+
+    // computed
+
+    int cpu_usage;
 };
 
-
-std::vector<cpu_info_t> readCPUInfo();
-int getNbCPUs();
-int getNbCores();
 int processCount();
 std::vector<process_info_t> processList();
-struct process_info_t getProcessDetail(pid_t pid);
+struct process_info_t processDetail(pid_t pid);
 
 
 // network

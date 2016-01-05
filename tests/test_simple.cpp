@@ -12,8 +12,7 @@ int main(int argc, char *argv[])
     // get current pid
     pid_t pid = getpid();
     // get first process owned by the user
-    struct process_info_t pinfo = getProcessDetail(pid);
-
+    struct process_info_t pinfo = processDetail(pid);
 
     std::cout << "details for PID : " << pid << std::endl;
     std::cout << "fd : " << pinfo.fds.size() << std::endl;

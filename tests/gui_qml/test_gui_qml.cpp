@@ -13,12 +13,14 @@ int main(int argc, char *argv[])
     SocketUNIXModel socket_unix_model;
 
     QQmlApplicationEngine engine;
-    engine.load(QUrl(QStringLiteral("qrc:/test_gui_qml.qml")));
 
     QQmlContext* ctxt = engine.rootContext();
     ctxt->setContextProperty("process_model", &process_model);
     ctxt->setContextProperty("socket_unix_model", &socket_unix_model);
 
+    engine.load(QUrl(QStringLiteral("qrc:/test_gui_qml.qml")));
+
+
+
     return app.exec();
 }
-

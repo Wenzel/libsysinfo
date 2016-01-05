@@ -7,6 +7,7 @@
 
 #include "processmodel.h"
 
+
 ProcessModel::ProcessModel(QObject *parent)
     : QAbstractListModel(parent)
 {
@@ -25,6 +26,7 @@ void ProcessModel::updateModel()
     beginResetModel();
 
     m_processes = processList();
+    std::reverse(m_processes.begin(), m_processes.end());
 
     endResetModel();
 }
@@ -33,6 +35,7 @@ QHash<int, QByteArray> ProcessModel::roleNames() const {
     QHash<int, QByteArray> roles;
     roles[PidRole] = "pid";
     roles[NameRole] = "name";
+    roles[CPUUsageRole] = "cpu_usage";
     roles[CmdlineRole] = "cmdline";
     return roles;
 }
@@ -53,6 +56,8 @@ QVariant ProcessModel::data(const QModelIndex & index, int role) const {
         return process.pid;
     case NameRole:
         return QString::fromUtf8(process.name.data(), process.name.size());
+    case CPUUsageRole:
+        return process.cpu_usage;
     case CmdlineRole:
         const char* delim = " ";
         std::stringstream res;
@@ -63,7 +68,6 @@ QVariant ProcessModel::data(const QModelIndex & index, int role) const {
 
     return QVariant();
 }
-
 
 QVariant ProcessModel::headerData(int section, Qt::Orientation orientation, int role) const
 {

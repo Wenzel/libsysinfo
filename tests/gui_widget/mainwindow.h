@@ -23,6 +23,8 @@ private:
 
     void timerEvent(QTimerEvent *event);
     void updateModel();
+
+    void center();
 };
 
 #endif // MAINWINDOW_H

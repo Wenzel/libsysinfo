@@ -14,6 +14,7 @@ public:
     enum ProcessRoles {
         PidRole = Qt::UserRole + 1,
         NameRole,
+        CPUUsageRole,
         CmdlineRole
     };
 
