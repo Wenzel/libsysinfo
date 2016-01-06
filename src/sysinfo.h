@@ -1,3 +1,6 @@
+#ifndef SYSINFO_H
+#define SYSINFO_H
+
 #include <fstream>
 #include <vector>
 #include <string>
@@ -470,3 +473,5 @@ struct tcp_socket_t
 
 std::vector<struct unix_socket_t> getSocketUNIX();
 std::vector<struct tcp_socket_t> getSocketTCP();
+
+#endif
