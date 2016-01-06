@@ -9,9 +9,6 @@ int main(int argc, char *argv[])
     argc = argc;
     argv = argv;
 
-    // init
-    sysinfoInit();
-
     // get current pid
     pid_t pid = getpid();
     // get first process owned by the user

@@ -1,6 +1,8 @@
 #ifndef SYSINFO_H
 #define SYSINFO_H
 
+#include <thread>
+#include <functional>
 #include <fstream>
 #include <vector>
 #include <string>
@@ -11,8 +13,11 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 
+#include "procconnector.h"
+
 // init
 void sysinfoInit();
+void startProcessEventListening();
 
 struct cpu_info_t
 {
@@ -420,12 +425,12 @@ struct process_info_t {
 };
 
 int processCount();
+void getProcess(int pid, struct process_info_t* pinfo);
 std::vector<process_info_t> processList();
 struct process_info_t processDetail(pid_t pid);
-
+void addCallbackProcessEvent(std::function<void(struct proc_event)> callback);
 
 // network
-
 
 enum socket_state {
     TCP_ESTABLISHED = 1,

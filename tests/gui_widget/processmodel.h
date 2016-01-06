@@ -23,7 +23,10 @@ public:
     QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
     void sort(int column, Qt::SortOrder order);
+    void callback(struct proc_event event);
 private:
+
+
     std::vector<struct process_info_t> m_processes;
     int m_timerId;
     QStringList m_header;

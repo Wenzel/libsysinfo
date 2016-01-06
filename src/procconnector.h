@@ -20,9 +20,6 @@ private:
     void connect();
     void subscribe();
 
-    void listenThread();
-
-
     int m_nl_sock;
     std::vector<std::function<void(struct proc_event)>> m_subscribers;
 };
