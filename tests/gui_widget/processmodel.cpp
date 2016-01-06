@@ -7,12 +7,13 @@
 
 #include "processmodel.h"
 
-
 ProcessModel::ProcessModel(QObject *parent)
     : QAbstractListModel(parent)
 {
     m_timerId = startTimer(1000);
     updateModel();
+
+    m_header << "PID" << "Name" << "CPU Usage" << "Command Line";
 }
 
 void ProcessModel::timerEvent(QTimerEvent *event)
@@ -26,39 +27,40 @@ void ProcessModel::updateModel()
     beginResetModel();
 
     m_processes = processList();
-    std::reverse(m_processes.begin(), m_processes.end());
+    // std::reverse(m_processes.begin(), m_processes.end());
 
     endResetModel();
 }
 
-QHash<int, QByteArray> ProcessModel::roleNames() const {
-    QHash<int, QByteArray> roles;
-    roles[PidRole] = "pid";
-    roles[NameRole] = "name";
-    roles[CPUUsageRole] = "cpu_usage";
-    roles[CmdlineRole] = "cmdline";
-    return roles;
-}
-
-int ProcessModel::rowCount(const QModelIndex & parent) const {
+int ProcessModel::rowCount(const QModelIndex & parent) const
+{
     Q_UNUSED(parent);
     return m_processes.size();
 }
 
+int ProcessModel::columnCount(const QModelIndex &parent) const
+{
+    return 4;
+}
+
 QVariant ProcessModel::data(const QModelIndex & index, int role) const {
-    if (index.row() < 0 || index.row() >= m_processes.size())
+    if (!index.isValid())
+        return QVariant();
+
+    if (role != Qt::DisplayRole)
         return QVariant();
 
     const struct process_info_t &process = m_processes[index.row()];
-    switch (role)
+
+    switch (index.column())
     {
-    case PidRole:
+    case 0:
         return process.pid;
-    case NameRole:
+    case 1:
         return QString::fromUtf8(process.name.data(), process.name.size());
-    case CPUUsageRole:
+    case 2:
         return process.cpu_usage;
-    case CmdlineRole:
+    case 3:
         const char* delim = " ";
         std::stringstream res;
         std::vector<std::string> cmdline = process.cmdline;
@@ -66,10 +68,19 @@ QVariant ProcessModel::data(const QModelIndex & index, int role) const {
         return QString::fromUtf8(res.str().data(), res.str().size());
     }
 
+
+
     return QVariant();
 }
 
 QVariant ProcessModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-    qDebug() << "Hello World!";
+    if (orientation == Qt::Horizontal and role == Qt::DisplayRole)
+        return m_header[section];
+    return QVariant();
+}
+
+void ProcessModel::sort(int column, Qt::SortOrder order)
+{
+
 }

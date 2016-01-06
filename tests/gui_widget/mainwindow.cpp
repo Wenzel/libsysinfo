@@ -13,13 +13,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     center();
 
-    timerId = startTimer(1000);
-    model = new QStandardItemModel(this);
-    model->setHorizontalHeaderItem(0, new QStandardItem(QString("PID")));
-    model->setHorizontalHeaderItem(1, new QStandardItem(QString("Name")));
-    model->setHorizontalHeaderItem(2, new QStandardItem(QString("Command Line")));
-
-    updateModel();
+    model = new ProcessModel(this);
+    ui->processView->setModel(model);
 }
 
 void MainWindow::center()
@@ -46,28 +41,4 @@ MainWindow::~MainWindow()
 {
     delete ui;
     delete model;
-}
-
-void MainWindow::updateModel()
-{
-    for (int i = 0; i < model->rowCount(); i++)
-        for (int j = 0; j < model->columnCount(); j++)
-            delete model->takeItem(i, j);
-
-    std::vector<struct process_info_t> proc_list = processList();
-    for (unsigned int i = 0; i < proc_list.size(); i++)
-    {
-        model->setItem(i, 0, new QStandardItem(QString::number(proc_list[i].pid)));
-        model->setItem(i, 1, new QStandardItem(QString::fromStdString(proc_list[i].name)));
-        QStringList cmdline;
-        for (std::string arg: proc_list[i].cmdline)
-            cmdline << QString::fromStdString(arg);
-        model->setItem(i, 2, new QStandardItem(cmdline.join(' ')));
-    }
-}
-
-void MainWindow::timerEvent(QTimerEvent *event)
-{
-    event = event;
-    updateModel();
 }

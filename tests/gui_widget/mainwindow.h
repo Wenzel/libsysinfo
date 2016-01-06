@@ -2,7 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QStandardItemModel>
+#include "processmodel.h"
 
 namespace Ui {
 class MainWindow;
@@ -18,10 +18,8 @@ public:
 
 private:
     Ui::MainWindow *ui;
-    QStandardItemModel* model;
-    int timerId;
+    ProcessModel* model;
 
-    void timerEvent(QTimerEvent *event);
     void updateModel();
 
     void center();
