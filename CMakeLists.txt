@@ -12,13 +12,23 @@ include(ccache)
 #-----------------------------------------------------------------------------
 #                           GENERAL CONFIGURATION
 #-----------------------------------------------------------------------------
-project(sysinfo CXX)
+project(sysinfo CXX C)
 #-----------------------------------------------------------------------------
 #                              DEPENDENCIES
 #-----------------------------------------------------------------------------
-find_package(Boost REQUIRED COMPONENTS system filesystem regex)
 set(ALL_INCLUDES ${Boost_INCLUDE_DIRS})
 set(ALL_LIBS ${Boost_LIBRARIES})
+
+find_package(Boost REQUIRED COMPONENTS system filesystem regex)
+list(APPEND ALL_INCLUDES ${Boost_INCLUDE_DIRS})
+list(APPEND ALL_LIBS ${Boost_LIBRARIES})
+
+# cmake bug, cannot find Thread
+#find_package(Threads REQUIRED)
+#list(APPEND ALL_INCLUDES ${Threads_INCLUDE_DIRS})
+#list(APPEND ALL_LIBS ${Threads_LIBRARIES})
+# workaround
+list(APPEND ALL_LIBS "pthread")
 
 
 #-----------------------------------------------------------------------------

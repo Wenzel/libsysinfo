@@ -261,6 +261,12 @@ static void getProcess(int pid, struct process_info_t* pinfo)
 
 // Public API
 
+// init
+void sysinfoInit()
+{
+
+}
+
 // System info
 std::vector<cpu_info_t> readCPUInfo()
 {

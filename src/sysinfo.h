@@ -11,7 +11,8 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 
-
+// init
+void sysinfoInit();
 
 struct cpu_info_t
 {
