@@ -84,11 +84,6 @@ QVariant ProcessModel::headerData(int section, Qt::Orientation orientation, int 
     return QVariant();
 }
 
-void ProcessModel::sort(int column, Qt::SortOrder order)
-{
-
-}
-
 void ProcessModel::callback(proc_event event)
 {
     pid_t pid;

@@ -97,7 +97,7 @@ static int updateCPUUsage(int pid, struct process_info_t* pinfo)
         long long unsigned delta_cpu_time = cpu_total_time - old_cpu_time.cpu_total_time;
         long long unsigned delta_process_time = process_total_time - old_cpu_time.proc_total_time;
         if (delta_cpu_time != 0)
-            cpu_usage = 100 * delta_process_time / delta_cpu_time;
+            cpu_usage = 100 * 8 * delta_process_time / delta_cpu_time; // TODO cache getNbCores()
 
         // update old values
         old_cpu_time.cpu_total_time = cpu_total_time;

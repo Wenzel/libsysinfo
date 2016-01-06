@@ -1,6 +1,7 @@
 #include <QStyle>
 #include <QDesktopWidget>
 #include <QTableView>
+
 #include <sysinfo.h>
 
 #include "mainwindow.h"
@@ -13,8 +14,10 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     center();
 
-    model = new ProcessModel(this);
-    ui->processView->setModel(model);
+    m_model = new ProcessModel(this);
+    m_proxy = new QSortFilterProxyModel(this);
+    m_proxy->setSourceModel(m_model);
+    ui->processView->setModel(m_proxy);
 }
 
 void MainWindow::center()
@@ -40,5 +43,6 @@ void MainWindow::center()
 MainWindow::~MainWindow()
 {
     delete ui;
-    delete model;
+    delete m_model;
+    delete m_proxy;
 }

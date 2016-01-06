@@ -22,7 +22,6 @@ public:
     int columnCount(const QModelIndex &parent) const;
     QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
-    void sort(int column, Qt::SortOrder order);
     void callback(struct proc_event event);
 private:
 

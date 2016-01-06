@@ -2,6 +2,8 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QSortFilterProxyModel>
+
 #include "processmodel.h"
 
 namespace Ui {
@@ -18,9 +20,8 @@ public:
 
 private:
     Ui::MainWindow *ui;
-    ProcessModel* model;
-
-    void updateModel();
+    ProcessModel* m_model;
+    QSortFilterProxyModel* m_proxy;
 
     void center();
 };
