@@ -402,6 +402,20 @@ struct process_info_t {
     /** root fileystem */
     std::string root;
 
+    /** UIDs **/
+    // real [0]
+    // effective [1]
+    // saved set [2]
+    // filesystem [3]
+    std::vector<int> uids;
+
+    /** GIDs **/
+    // real [0]
+    // effective [1]
+    // saved set [2]
+    // filesystem [3]
+    std::vector<int> gids;
+
     // details
 
     /** fs **/

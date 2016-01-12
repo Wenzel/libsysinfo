@@ -382,10 +382,33 @@ void getProcess(int pid, struct process_info_t* pinfo)
     if_stat >> pinfo->env_start;
     if_stat >> pinfo->env_end;
     if_stat >> pinfo->exit_code;
+    if_stat.close();
 
+
+    // get some info from status
+    std::ifstream if_status(process_path + "status");
+    while (std::getline(if_status, line))
+    {
+        boost::regex regex("^.?id:\\s+([[:digit:]]+)\\s+([[:digit:]])\\s+([[:digit:]]+)\\s+([[:digit:]]+)\\s*$");
+        boost::smatch match;
+        if (boost::regex_match(line, match, regex))
+        {
+            if (match.size() == 4 + 1)
+            {
+                if (line.at(0) == 'U') // Uid
+                    for (int i = 0 ; i < 3 ; i++)
+                        pinfo->uids.push_back(std::stoi(match[i + 1]));
+                else // Gid
+                    for (int i = 0 ; i < 3 ; i++)
+                        pinfo->gids.push_back(std::stoi(match[i + 1]));
+            }
+        }
+    }
+    if_status.close();
+
+    // update CPU usage
     pinfo->cpu_usage = updateCPUUsage(pid, pinfo);
 
-    if_stat.close();
 }
 
 std::vector<struct process_info_t> processList()
