@@ -23,23 +23,6 @@ struct old_cpu_time_t
 
 static std::unordered_map<int, struct old_cpu_time_t> map_pid_usage;
 
-// trim from start
-static inline std::string &ltrim(std::string &s) {
-    s.erase(s.begin(), std::find_if(s.begin(), s.end(), std::not1(std::ptr_fun<int, int>(std::isspace))));
-    return s;
-}
-
-// trim from end
-static inline std::string &rtrim(std::string &s) {
-    s.erase(std::find_if(s.rbegin(), s.rend(), std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
-    return s;
-}
-
-// trim from both ends
-static inline std::string &trim(std::string &s) {
-    return ltrim(rtrim(s));
-}
-
 static std::vector<int> getProcessList()
 {
     std::vector<int> process_pid_list;
@@ -148,10 +131,10 @@ std::vector<cpu_info_t> readCPUInfo()
         // read key
         std::string key;
         std::getline(line_stream, key, ':');
-        key = trim(key);
+        boost::algorithm::trim(key);
         // read value
         std::string value;
-        value = trim(value);
+        boost::algorithm::trim(value);
         std::getline(line_stream, value);
 
         if (key == "processor")
@@ -297,7 +280,7 @@ void getProcess(int pid, struct process_info_t* pinfo)
         std::istringstream stream(line);
         getline(stream, key, ':');
         getline(stream, value);
-        value = trim(value);
+        boost::algorithm::trim(value);
         if (key == "rchar")
             pinfo->io.rchar = std::stol(value);
         else if (key == "wchar")
@@ -505,7 +488,7 @@ struct process_info_t processDetail(pid_t pid)
                 if (match.size() == 2 + 1)
                 {
                     std::string value(match[2]);
-                    boost::trim(value);
+                    boost::algorithm::trim(value);
                     boost::regex regex_value("^([[:digit:]])\\s.*$");
                     boost::smatch match_value;
                     if (boost::regex_match(value, match_value, regex_value))
@@ -573,7 +556,7 @@ struct process_info_t processDetail(pid_t pid)
                     (match[2] == "unlimited") ? soft_lmt = -1 : soft_lmt = std::stoi(match[2]);
                     (match[3] == "unlimited") ? hard_lmt = -1 : hard_lmt = std::stoi(match[3]);
                     std::string field_name = match[1];
-                    boost::trim(field_name);
+                    boost::algorithm::trim(field_name);
                     if (field_name == "cpu time")
                     {
                         pinfo.limits.cpu_time_soft_lmt = soft_lmt;
