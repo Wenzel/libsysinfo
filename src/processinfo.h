@@ -149,9 +149,24 @@ class ProcessInfo
 {
 
 public:
-    ProcessInfo(pid_t pid);
+    ProcessInfo(pid_t pid, bool detail = false);
+
+    // getters
+    pid_t pid();
+    std::string name();
+    std::string cmdline();
+    std::string cwd();
+    std::string root();
+    std::string exe();
+    std::unordered_map<std::string, std::string> environ();
+    int cpuUsage();
+
 
 private:
+    // static
+    static std::unordered_map<int, struct old_cpu_time_t> map_pid_usage;
+
+    // functions
     void readSymlinks();
     void readCmdline();
     void readStat();
@@ -159,15 +174,22 @@ private:
     void readEnviron();
     void readIo();
     void updateCPUUsage();
+    void detailedInfo();
+    void readFd();
+    void readCgroup();
+    void readSmaps();
+    void readLimits();
+    void readStack();
 
+
+    // friend
     friend std::ostream & operator<<(std::ostream &os, const ProcessInfo& p);
 
-    // static
-    static std::unordered_map<int, struct old_cpu_time_t> map_pid_usage;
-
-    // properties
+    // main properties
     std::string m_proc_path;
+    pid_t m_pid;
     std::string m_name;
+    process_status m_status;
     std::vector<std::string> m_cmdline;
     std::string m_cwd;
     std::string m_root;
@@ -190,8 +212,6 @@ private:
 
     // rest
 
-    /** The Process ID */
-    pid_t m_pid;
 
     /** The parent process ID */
     pid_t m_ppid;
@@ -317,9 +337,6 @@ private:
 
     /** The process ID of any application that is debugging this one. 0 if none */
     pid_t m_tracerpid;
-
-    /** A character description of the process status */
-    process_status m_status;
 
     /** The tty the process owns */
     std::string m_tty;

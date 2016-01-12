@@ -60,7 +60,7 @@ int getNbCores();
 std::vector<int> processListPid();
 int processCount();
 std::vector<ProcessInfo> processList();
-// struct process_info_t processDetail(pid_t pid);
+
 void addCallbackProcessEvent(std::function<void(struct proc_event)> callback);
 
 // network
