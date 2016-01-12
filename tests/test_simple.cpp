@@ -4,13 +4,15 @@
 #include <unistd.h>
 #include <boost/algorithm/string/join.hpp>
 
-int main(int argc, char *argv[])
+int main()
 {
-    argc = argc;
-    argv = argv;
 
     // get current pid
     pid_t pid = getpid();
+
+    std::cout << "Nb process : " << processCount() << std::endl;
+
+    /*
     // get first process owned by the user
     struct process_info_t pinfo = processDetail(pid);
 
@@ -54,4 +56,5 @@ int main(int argc, char *argv[])
     {
         std::cout << tcp_sock.local_address << ":" << tcp_sock.local_port << " " << tcp_sock.rem_address << ":" << tcp_sock.rem_port << std::endl;
     }
+    */
 }
