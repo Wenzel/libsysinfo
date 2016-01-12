@@ -14,14 +14,14 @@ int main()
 
     // display basic information for each one
     std::vector<ProcessInfo> process_list = processList();
-
     for (ProcessInfo pinfo : process_list)
         std::cout << pinfo << std::endl;
 
-    /*
-    // get first process owned by the user
-    struct process_info_t pinfo = processDetail(pid);
 
+    // get detailed info
+    ProcessInfo pinfo(pid, true);
+
+    /*
     std::cout << "details for PID : " << pid << std::endl;
     std::cout << "fd : " << pinfo.fds.size() << std::endl;
     for (auto const &pair : pinfo.fds)
