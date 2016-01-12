@@ -15,14 +15,6 @@ static std::thread* event_thread;
 
 // Private
 
-struct old_cpu_time_t
-{
-    long long unsigned cpu_total_time;
-    long long unsigned proc_total_time;
-};
-
-static std::unordered_map<int, struct old_cpu_time_t> map_pid_usage;
-
 static std::vector<int> getProcessList()
 {
     std::vector<int> process_pid_list;
@@ -42,55 +34,6 @@ static std::vector<int> getProcessList()
     return process_pid_list;
 }
 
-
-static int updateCPUUsage(int pid, struct process_info_t* pinfo)
-{
-    int cpu_usage = 0;
-
-    // read /proc/stat
-    std::ifstream if_cpu_stat("/proc/stat");
-    std::string tmp;
-    if_cpu_stat >> tmp;
-    long long unsigned user,nice,system,idle,cpu_total_time;
-    user = 0;
-    if_cpu_stat >> user;
-    if_cpu_stat >> nice;
-    if_cpu_stat >> system;
-    if_cpu_stat >> idle;
-    if_cpu_stat.close();
-    // get cpu_total_time
-    cpu_total_time = user + nice + system + idle;
-
-    // get process_total_time
-    long long unsigned process_total_time = pinfo->utime + pinfo->stime;
-    struct old_cpu_time_t old_cpu_time;
-
-
-    if (map_pid_usage.find(pid) == map_pid_usage.end())
-    {
-        // insert
-        old_cpu_time.cpu_total_time = cpu_total_time;
-        old_cpu_time.proc_total_time = process_total_time;
-        map_pid_usage[pid] = old_cpu_time;
-    }
-    else
-    {
-        // retrieve old value
-        old_cpu_time = map_pid_usage[pid];
-        long long unsigned delta_cpu_time = cpu_total_time - old_cpu_time.cpu_total_time;
-        long long unsigned delta_process_time = process_total_time - old_cpu_time.proc_total_time;
-        if (delta_cpu_time != 0)
-            cpu_usage = 100 * 8 * delta_process_time / delta_cpu_time; // TODO cache getNbCores()
-
-        // update old values
-        old_cpu_time.cpu_total_time = cpu_total_time;
-        old_cpu_time.proc_total_time = process_total_time;
-        map_pid_usage[pid] = old_cpu_time;
-    }
-
-    return cpu_usage;
-}
-
 // Public API
 
 
@@ -99,7 +42,6 @@ void sysinfoInit()
 {
     connector = new ProcConnector();
 }
-
 
 void startProcessEventListening()
 {
@@ -232,195 +174,15 @@ int processCount()
     return getProcessList().size();
 }
 
-void getProcess(int pid, struct process_info_t* pinfo)
+std::vector<ProcessInfo> processList()
 {
-    std::string process_path = "/proc/" + std::to_string(pid) + "/";
-
-    // read cmdline
-    std::ifstream if_cmdline(process_path + "cmdline");
-    std::string cur_arg;
-    while (getline(if_cmdline, cur_arg, '\0'))
-        pinfo->cmdline.push_back(cur_arg);
-    if_cmdline.close();
-
-
-    // read cwd
-    // cwd is a symlink to the process's current working directory
-    boost::system::error_code ec;
-    pinfo->cwd = boost::filesystem::read_symlink(process_path + "cwd", ec).string();
-
-    // read environ
-    std::ifstream if_environ(process_path + "environ");
-    std::string cur_env;
-    while (getline(if_environ, cur_env, '\0'))
-    {
-        std::istringstream stream(cur_env);
-        std::string key;
-        std::string value;
-        // split on '='
-        getline(stream, key, '=');
-        getline(stream, value);
-        pinfo->env[key] = value;
-    }
-    if_environ.close();
-
-    // read exe
-    // this file is a symbolic link containing the actual
-    // pathname of the executed command
-    pinfo->exe = boost::filesystem::read_symlink(process_path + "exe", ec).string();
-
-    // read io
-    std::ifstream if_io(process_path + "io");
-    std::string line;
-    while (getline(if_io, line))
-    {
-        std::string key;
-        std::string value;
-        // parse key: value
-        std::istringstream stream(line);
-        getline(stream, key, ':');
-        getline(stream, value);
-        boost::algorithm::trim(value);
-        if (key == "rchar")
-            pinfo->io.rchar = std::stol(value);
-        else if (key == "wchar")
-            pinfo->io.wchar = sleeping; // TODO
-        else if (key == "syscr")
-            pinfo->io.syscr = std::stol(value);
-        else if (key == "syscw")
-            pinfo->io.syscw = std::stol(value);
-        else if (key == "read_bytes")
-            pinfo->io.read_bytes = std::stol(value);
-        else if (key == "write_bytes")
-            pinfo->io.write_bytes = std::stol(value);
-        else if (key == "cancelled_write_bytes")
-            pinfo->io.cancelled_write_bytes = std::stol(value);
-    }
-    if_io.close();
-
-    // read root
-    // root is a symlink to the process's filesystem root (chroot)
-    pinfo->root = boost::filesystem::read_symlink(process_path + "root", ec).string();
-
-    // read stat
-    std::ifstream if_stat(process_path + "stat");
-    // pid
-    if_stat >> pinfo->pid;
-    // name
-    if_stat >> pinfo->name; // (name)
-    pinfo->name.erase(std::remove(pinfo->name.begin(), pinfo->name.end(), '('), pinfo->name.end());
-    pinfo->name.erase(std::remove(pinfo->name.begin(), pinfo->name.end(), ')'), pinfo->name.end());
-    // status
-    std::string status;
-    if_stat >> status;
-    if (status == "R")
-        pinfo->status = running;
-    else if (status == "S")
-        pinfo->status = sleeping;
-    else if (status == "D")
-        pinfo->status = disk_sleep;
-    else if (status == "Z")
-        pinfo->status = zombie;
-    else if (status == "T")
-        pinfo->status = stopped;
-    else if (status == "t")
-        pinfo->status = tracing_stop;
-    else if (status == "W")
-        pinfo->status = waking;
-    else if (status == "X" or status == "x")
-        pinfo->status = dead;
-    else if (status == "K")
-        pinfo->status = wakekill;
-    else if (status == "P")
-        pinfo->status = parked;
-
-    if_stat >> pinfo->ppid;
-    if_stat >> pinfo->pgrp;
-    if_stat >> pinfo->session;
-    if_stat >> pinfo->tty_nr;
-    if_stat >> pinfo->tpgid;
-    if_stat >> pinfo->flags;
-    if_stat >> pinfo->minflt;
-    if_stat >> pinfo->cminflt;
-    if_stat >> pinfo->cmajflt;
-    if_stat >> pinfo->utime;
-    if_stat >> pinfo->stime;
-    if_stat >> pinfo->cutime;
-    if_stat >> pinfo->cstime;
-    if_stat >> pinfo->priority;
-    if_stat >> pinfo->nice;
-    if_stat >> pinfo->num_threads;
-    if_stat >> pinfo->itrealvalue;
-    if_stat >> pinfo->starttime;
-    if_stat >> pinfo->vsize;
-    if_stat >> pinfo->rss;
-    if_stat >> pinfo->rsslim;
-    if_stat >> pinfo->startcode;
-    if_stat >> pinfo->endcode;
-    if_stat >> pinfo->startstack;
-    if_stat >> pinfo->kstkesp;
-    if_stat >> pinfo->kstkeip;
-    if_stat >> pinfo->signal;
-    if_stat >> pinfo->blocked;
-    if_stat >> pinfo->siginore;
-    if_stat >> pinfo->sigcatch;
-    if_stat >> pinfo->wchan;
-    if_stat >> pinfo->nswap;
-    if_stat >> pinfo->cnswap;
-    if_stat >> pinfo->exit_signal;
-    if_stat >> pinfo->processor;
-    if_stat >> pinfo->rt_priority;
-    if_stat >> pinfo->policy;
-    if_stat >> pinfo->delayacct_blkio_ticks;
-    if_stat >> pinfo->guest_time;
-    if_stat >> pinfo->cguest_time;
-    if_stat >> pinfo->start_data;
-    if_stat >> pinfo->end_data;
-    if_stat >> pinfo->start_brk;
-    if_stat >> pinfo->arg_start;
-    if_stat >> pinfo->arg_end;
-    if_stat >> pinfo->env_start;
-    if_stat >> pinfo->env_end;
-    if_stat >> pinfo->exit_code;
-    if_stat.close();
-
-
-    // get some info from status
-    std::ifstream if_status(process_path + "status");
-    while (std::getline(if_status, line))
-    {
-        boost::regex regex("^.?id:\\s+([[:digit:]]+)\\s+([[:digit:]])\\s+([[:digit:]]+)\\s+([[:digit:]]+)\\s*$");
-        boost::smatch match;
-        if (boost::regex_match(line, match, regex))
-        {
-            if (match.size() == 4 + 1)
-            {
-                if (line.at(0) == 'U') // Uid
-                    for (int i = 0 ; i < 3 ; i++)
-                        pinfo->uids.push_back(std::stoi(match[i + 1]));
-                else // Gid
-                    for (int i = 0 ; i < 3 ; i++)
-                        pinfo->gids.push_back(std::stoi(match[i + 1]));
-            }
-        }
-    }
-    if_status.close();
-
-    // update CPU usage
-    pinfo->cpu_usage = updateCPUUsage(pid, pinfo);
-
-}
-
-std::vector<struct process_info_t> processList()
-{
-    std::vector<struct process_info_t> process_list;
+    std::vector<ProcessInfo> process_list;
     std::vector<int> process_pid_list = getProcessList();
 
     for (int pid : process_pid_list)
     {
         try {
-            struct process_info_t pinfo;
-            getProcess(pid, &pinfo);
+            ProcessInfo pinfo(pid);
             process_list.push_back(pinfo);
         } catch (std::string e)
         {
@@ -431,6 +193,8 @@ std::vector<struct process_info_t> processList()
     return process_list;
 }
 
+// TODO
+/*
 struct process_info_t processDetail(pid_t pid)
 {
     struct process_info_t pinfo;
@@ -678,6 +442,8 @@ struct process_info_t processDetail(pid_t pid)
 
     return pinfo;
 }
+
+*/
 
 void addCallbackProcessEvent(std::function<void (proc_event)> callback)
 {
