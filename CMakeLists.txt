@@ -6,8 +6,8 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/find")
 #-----------------------------------------------------------------------------
 #                               MODULES
 #-----------------------------------------------------------------------------
-include(static_analysis)
-include(doxygen)
+# include(static_analysis)
+# include(doxygen)
 include(ccache)
 #-----------------------------------------------------------------------------
 #                           GENERAL CONFIGURATION
@@ -47,7 +47,7 @@ endif()
 #                               SOURCES
 #-----------------------------------------------------------------------------
 add_subdirectory(src)
-include(uninstall)
+# include(uninstall)
 
 #-----------------------------------------------------------------------------
 #                               TESTS
