@@ -57,6 +57,7 @@ int getNbCores();
 
 // Process
 
+std::vector<int> processListPid();
 int processCount();
 // void getProcess(int pid, struct process_info_t* pinfo);
 std::vector<ProcessInfo> processList();

@@ -13,27 +13,6 @@
 static ProcConnector* connector;
 static std::thread* event_thread;
 
-// Private
-
-static std::vector<int> getProcessList()
-{
-    std::vector<int> process_pid_list;
-    boost::filesystem::path proc_path("/proc");
-    boost::filesystem::directory_iterator end_itr;
-    for (boost::filesystem::directory_iterator itr(proc_path);
-         itr != end_itr;
-         ++itr)
-    {
-        if (boost::filesystem::is_directory(itr->status())
-                && boost::regex_match(itr->path().filename().string(), boost::regex("\\d+")))
-        {
-            int pid = std::stoi(itr->path().filename().string());
-            process_pid_list.push_back(pid);
-        }
-    }
-    return process_pid_list;
-}
-
 // Public API
 
 
@@ -169,15 +148,35 @@ int getNbCores()
 
 // process
 
+std::vector<int> processListPid()
+{
+    std::vector<int> process_pid_list;
+    boost::filesystem::path proc_path("/proc");
+    boost::filesystem::directory_iterator end_itr;
+    for (boost::filesystem::directory_iterator itr(proc_path);
+         itr != end_itr;
+         ++itr)
+    {
+        if (boost::filesystem::is_directory(itr->status())
+                && boost::regex_match(itr->path().filename().string(), boost::regex("\\d+")))
+        {
+            int pid = std::stoi(itr->path().filename().string());
+            process_pid_list.push_back(pid);
+        }
+    }
+    return process_pid_list;
+}
+
+
 int processCount()
 {
-    return getProcessList().size();
+    return processListPid().size();
 }
 
 std::vector<ProcessInfo> processList()
 {
     std::vector<ProcessInfo> process_list;
-    std::vector<int> process_pid_list = getProcessList();
+    std::vector<int> process_pid_list = processListPid();
 
     for (int pid : process_pid_list)
     {
