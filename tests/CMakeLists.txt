@@ -1,4 +1,4 @@
-include_directories(${CMAKE_SOURCE_DIR}/src)
+include_directories(${libsysinfo_SOURCE_DIR}/src)
 
 add_executable(test_simple test_simple.cpp)
 target_link_libraries(test_simple sysinfo)
