@@ -152,14 +152,14 @@ public:
     ProcessInfo(pid_t pid, bool detail = false);
 
     // getters
-    pid_t pid();
-    std::string name();
-    std::string cmdline();
-    std::string cwd();
-    std::string root();
-    std::string exe();
-    std::unordered_map<std::string, std::string> environ();
-    int cpuUsage();
+    pid_t pid() const;
+    const std::string name() const;
+    const std::string cmdline() const;
+    const std::string cwd() const;
+    const std::string root() const;
+    const std::string exe() const;
+    const std::unordered_map<std::string, std::string> environ() const;
+    int cpuUsage() const;
 
 
 private:

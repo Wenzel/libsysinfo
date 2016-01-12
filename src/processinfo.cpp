@@ -34,9 +34,9 @@ ProcessInfo::ProcessInfo(pid_t pid, bool detail)
 }
 
 // getters
-pid_t ProcessInfo::pid() { return m_pid; }
-std::string ProcessInfo::name() { return  m_name; }
-std::string ProcessInfo::cmdline()
+pid_t ProcessInfo::pid() const { return m_pid; }
+const std::string ProcessInfo::name() const { return  m_name; }
+const std::string ProcessInfo::cmdline() const
 {
     const char* delim = " ";
     std::stringstream res;
@@ -44,11 +44,11 @@ std::string ProcessInfo::cmdline()
     return res.str();
 }
 
-std::string ProcessInfo::cwd() { return m_cwd; }
-std::string ProcessInfo::root() { return m_root; }
-std::string ProcessInfo::exe() { return m_exe; }
-std::unordered_map<std::string, std::string> ProcessInfo::environ() { return m_environ; }
-int ProcessInfo::cpuUsage() { return m_cpu_usage; }
+const std::string ProcessInfo::cwd() const { return m_cwd; }
+const std::string ProcessInfo::root() const { return m_root; }
+const std::string ProcessInfo::exe() const { return m_exe; }
+const std::unordered_map<std::string, std::string> ProcessInfo::environ() const { return m_environ; }
+int ProcessInfo::cpuUsage() const { return m_cpu_usage; }
 
 
 void ProcessInfo::readSymlinks()
