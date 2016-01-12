@@ -6,11 +6,17 @@
 
 int main()
 {
-
     // get current pid
     pid_t pid = getpid();
 
+    // count processes
     std::cout << "Nb process : " << processCount() << std::endl;
+
+    // display basic information for each one
+    std::vector<ProcessInfo> process_list = processList();
+
+    for (ProcessInfo pinfo : process_list)
+        std::cout << pinfo << std::endl;
 
     /*
     // get first process owned by the user
