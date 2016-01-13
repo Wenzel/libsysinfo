@@ -49,7 +49,7 @@ const std::string ProcessInfo::root() const { return m_root; }
 const std::string ProcessInfo::exe() const { return m_exe; }
 const std::unordered_map<std::string, std::string> ProcessInfo::environ() const { return m_environ; }
 int ProcessInfo::cpuUsage() const { return m_cpu_usage; }
-const ProcessInfo::userName() const
+const std::string ProcessInfo::userName() const
 {
     struct passwd* pass;
     pass = getpwuid(m_uids[0]); // real uid
