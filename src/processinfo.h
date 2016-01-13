@@ -8,6 +8,7 @@
 #include <vector>
 
 #include <sys/types.h>
+#include <pwd.h>
 
 enum process_status
 {
@@ -160,6 +161,7 @@ public:
     const std::string exe() const;
     const std::unordered_map<std::string, std::string> environ() const;
     int cpuUsage() const;
+    const std::string userName() const;
 
 
 private:
