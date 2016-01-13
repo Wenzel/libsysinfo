@@ -169,17 +169,17 @@ void ProcessInfo::readStatus()
     while (std::getline(if_status, line))
     {
         // read uids and gids
-        boost::regex regex("^.?id:\\s+([[:digit:]]+)\\s+([[:digit:]])\\s+([[:digit:]]+)\\s+([[:digit:]]+)\\s*$");
+        boost::regex regex("^.?id:\\s+([[:digit:]]+)\\s+([[:digit:]]+)\\s+([[:digit:]]+)\\s+([[:digit:]]+)\\s*$");
         boost::smatch match;
         if (boost::regex_match(line, match, regex))
         {
             if (match.size() == 4 + 1)
             {
                 if (line.at(0) == 'U') // Uid
-                    for (int i = 0 ; i < 3 ; i++)
+                    for (int i = 0 ; i < 4 ; i++)
                         this->m_uids.push_back(std::stoi(match[i + 1]));
                 else // Gid
-                    for (int i = 0 ; i < 3 ; i++)
+                    for (int i = 0 ; i < 4 ; i++)
                         this->m_gids.push_back(std::stoi(match[i + 1]));
             }
         }
