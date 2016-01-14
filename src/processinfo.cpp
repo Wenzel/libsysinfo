@@ -55,6 +55,8 @@ const std::string ProcessInfo::userName() const
     pass = getpwuid(m_uids[0]); // real uid
     return std::string(pass->pw_name);
 }
+long unsigned int ProcessInfo::vmSize() const { return m_vmsize; }
+
 
 void ProcessInfo::readSymlinks()
 {
@@ -129,7 +131,7 @@ void ProcessInfo::readStat()
     if_stat >> this->m_num_threads;
     if_stat >> this->m_itrealvalue;
     if_stat >> this->m_starttime;
-    if_stat >> this->m_vsize;
+    if_stat >> this->m_vmsize;
     if_stat >> this->m_rss;
     if_stat >> this->m_rsslim;
     if_stat >> this->m_startcode;

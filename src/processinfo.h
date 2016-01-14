@@ -162,7 +162,7 @@ public:
     const std::unordered_map<std::string, std::string> environ() const;
     int cpuUsage() const;
     const std::string userName() const;
-
+    long unsigned int vmSize() const;
 
 private:
     // static
@@ -277,7 +277,7 @@ private:
 
     long long unsigned int m_starttime;
 
-    long unsigned int m_vsize;
+    long unsigned int m_vmsize;
 
     long int m_rss;
 
@@ -352,14 +352,6 @@ private:
     /** The i/o scheduling class and priority. */
     int m_ioPriorityClass;  /**< 0 for none, 1 for realtime, 2 for best-effort, 3 for idle.  -1 for error. */
     int m_ioPriority;       /**< Between 0 and 7.  0 is highest priority, 7 is lowest.  -1 for error. */
-
-    /**
-      The total amount of virtual memory space that this process uses. This includes shared and
-      swapped memory, plus graphics memory and mmap'ed files and so on.
-
-      This is in KiB
-     */
-    unsigned long m_vmSize;
 
     /**
       The amount of physical memory the process currently uses, including the physical memory used by any
