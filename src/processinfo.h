@@ -158,7 +158,8 @@ public:
     int sid() const;
     int ttyNr() const;
     int tpgid() const;
-
+    const std::vector<int>& uids() const;
+    const std::vector<int>& gids() const;
     const std::string name() const;
     const std::string cmdline() const;
     const std::string cwd() const;    const std::string root() const;
@@ -167,6 +168,8 @@ public:
     int cpuUsage() const;
     const std::string userName() const;
     long unsigned int vmSize() const;
+
+
 
 private:
     // static
