@@ -56,7 +56,10 @@ const std::string ProcessInfo::userName() const
     return std::string(pass->pw_name);
 }
 long unsigned int ProcessInfo::vmSize() const { return m_vmsize; }
-
+int ProcessInfo::ppid() const { return m_ppid; }
+int ProcessInfo::sid() const { return m_session; }
+int ProcessInfo::ttyNr() const { return m_tty_nr; }
+int ProcessInfo::tpgid() const { return m_tpgid; }
 
 void ProcessInfo::readSymlinks()
 {

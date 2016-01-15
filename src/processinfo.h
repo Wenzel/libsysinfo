@@ -154,10 +154,14 @@ public:
 
     // getters
     pid_t pid() const;
+    pid_t ppid() const;
+    int sid() const;
+    int ttyNr() const;
+    int tpgid() const;
+
     const std::string name() const;
     const std::string cmdline() const;
-    const std::string cwd() const;
-    const std::string root() const;
+    const std::string cwd() const;    const std::string root() const;
     const std::string exe() const;
     const std::unordered_map<std::string, std::string> environ() const;
     int cpuUsage() const;
@@ -339,9 +343,6 @@ private:
 
     /** The process ID of any application that is debugging this one. 0 if none */
     pid_t m_tracerpid;
-
-    /** The tty the process owns */
-    std::string m_tty;
 
     /**
       The nice level. The range should be -20 to 20. I'm not sure
