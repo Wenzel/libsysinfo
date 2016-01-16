@@ -156,6 +156,7 @@ public:
     // getters
     pid_t pid() const;
     pid_t ppid() const;
+    int pgid() const;
     int sid() const;
     const std::string ttyNr() const;
     int tpgid() const;
@@ -227,7 +228,7 @@ private:
     pid_t m_ppid;
 
     /** The process group ID of the process */
-    pid_t m_pgrp;
+    pid_t m_pgid;
 
     /** The session ID of the process */
     int m_session;

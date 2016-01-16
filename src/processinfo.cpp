@@ -19,7 +19,7 @@ std::ostream& operator<<(std::ostream& os, const ProcessInfo& p)
     os << "Name : " << p.name() << std::endl;
     os << "PID : " << p.pid() << std::endl;
     os << "Parent PID : " << p.ppid() << std::endl;
-    os << "Process Group ID : " << p.m_pgrp << std::endl;
+    os << "Process Group ID : " << p.pgid() << std::endl;
     os << "Session ID : " << p.sid() << std::endl;
     os << "Controlling tty : " << "Major : " << MAJOR(p.m_tty_nr) << ", Minor : " << MINOR(p.m_tty_nr) << " (" << p.ttyNr() << ")" << std::endl;
 
@@ -66,6 +66,7 @@ const std::string ProcessInfo::userName() const
 }
 long unsigned int ProcessInfo::vmSize() const { return m_vmsize; }
 int ProcessInfo::ppid() const { return m_ppid; }
+int ProcessInfo::pgid() const { return m_pgid; }
 int ProcessInfo::sid() const { return m_session; }
 const std::string ProcessInfo::ttyNr() const {
     // /dev/tty* ?
@@ -104,7 +105,6 @@ const std::string ProcessInfo::ttyNr() const {
     }
     return std::string();
 }
-
 int ProcessInfo::tpgid() const { return m_tpgid; }
 const std::vector<int>& ProcessInfo::uids() const { return m_uids; }
 const std::vector<int>& ProcessInfo::gids() const { return m_gids; }
@@ -165,7 +165,7 @@ void ProcessInfo::readStat()
         this->m_status = parked;
 
     if_stat >> this->m_ppid;
-    if_stat >> this->m_pgrp;
+    if_stat >> this->m_pgid;
     if_stat >> this->m_session;
     if_stat >> this->m_tty_nr;
     if_stat >> this->m_tpgid;
