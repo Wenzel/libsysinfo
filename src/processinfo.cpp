@@ -7,6 +7,7 @@
 
 #include <fcntl.h>
 #include <sys/stat.h>
+#include <sys/sysinfo.h>
 
 #include "processinfo.h"
 
@@ -22,7 +23,8 @@ std::ostream& operator<<(std::ostream& os, const ProcessInfo& p)
     os << "Process Group ID : " << p.pgid() << std::endl;
     os << "Session ID : " << p.sid() << std::endl;
     os << "Controlling tty : " << "Major : " << MAJOR(p.m_tty_nr) << ", Minor : " << MINOR(p.m_tty_nr) << " (" << p.ttyNr() << ")" << std::endl;
-
+    os << "starttime : " << "jiffies : " << p.m_starttime << ", diff : " << p.startTime() << std::endl;
+    os << "Threads : " << p.m_num_threads << std::endl;
     return os;
 }
 
@@ -108,7 +110,17 @@ const std::string ProcessInfo::ttyNr() const {
 int ProcessInfo::tpgid() const { return m_tpgid; }
 const std::vector<int>& ProcessInfo::uids() const { return m_uids; }
 const std::vector<int>& ProcessInfo::gids() const { return m_gids; }
-long long unsigned int ProcessInfo::startTime() const { return m_starttime; }
+long long unsigned int ProcessInfo::startTime() const {
+    // convert jiffies to seconds
+    long hz = sysconf(_SC_CLK_TCK);
+    long long unsigned int starttime_sec = m_starttime / hz;
+    // get uptime
+    struct sysinfo info;
+    sysinfo(&info);
+    long long unsigned int diff = info.uptime - starttime_sec;
+    return diff;
+
+}
 
 void ProcessInfo::readSymlinks()
 {
@@ -173,6 +185,7 @@ void ProcessInfo::readStat()
     if_stat >> this->m_flags;
     if_stat >> this->m_minflt;
     if_stat >> this->m_cminflt;
+    if_stat >> this->m_majflt;
     if_stat >> this->m_cmajflt;
     if_stat >> this->m_utime;
     if_stat >> this->m_stime;
