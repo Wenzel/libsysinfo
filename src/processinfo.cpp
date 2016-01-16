@@ -108,6 +108,7 @@ const std::string ProcessInfo::ttyNr() const {
 int ProcessInfo::tpgid() const { return m_tpgid; }
 const std::vector<int>& ProcessInfo::uids() const { return m_uids; }
 const std::vector<int>& ProcessInfo::gids() const { return m_gids; }
+long long unsigned int ProcessInfo::startTime() const { return m_starttime; }
 
 void ProcessInfo::readSymlinks()
 {
