@@ -13,8 +13,14 @@ std::unordered_map<int, struct old_cpu_time_t> ProcessInfo::map_pid_usage;
 // overload operator<<
 std::ostream& operator<<(std::ostream& os, const ProcessInfo& p)
 {
+    os << "Name : " << p.name() << std::endl;
+    os << "PID : " << p.pid() << std::endl;
+    os << "Parent PID : " << p.ppid() << std::endl;
+    os << "Process Group ID : " << p.m_pgrp << std::endl;
+    os << "Session ID : " << p.sid() << std::endl;
+    // os << "Controlling tty : " << p.ttyNr() << std::endl;
 
-  return os;
+    return os;
 }
 
 ProcessInfo::ProcessInfo(pid_t pid, bool detail)
@@ -58,7 +64,12 @@ const std::string ProcessInfo::userName() const
 long unsigned int ProcessInfo::vmSize() const { return m_vmsize; }
 int ProcessInfo::ppid() const { return m_ppid; }
 int ProcessInfo::sid() const { return m_session; }
-int ProcessInfo::ttyNr() const { return m_tty_nr; }
+const std::string& ProcessInfo::ttyNr() const {
+    int major = MAJOR(m_tty_nr);
+    int minor = MINOR(m_tty_nr);
+    // std::cout << major << ", " << minor << std::endl;
+}
+
 int ProcessInfo::tpgid() const { return m_tpgid; }
 const std::vector<int>& ProcessInfo::uids() const { return m_uids; }
 const std::vector<int>& ProcessInfo::gids() const { return m_gids; }

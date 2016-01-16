@@ -9,6 +9,7 @@
 
 #include <sys/types.h>
 #include <pwd.h>
+#include <linux/kdev_t.h>
 
 enum process_status
 {
@@ -156,7 +157,7 @@ public:
     pid_t pid() const;
     pid_t ppid() const;
     int sid() const;
-    int ttyNr() const;
+    const std::string& ttyNr() const;
     int tpgid() const;
     const std::vector<int>& uids() const;
     const std::vector<int>& gids() const;
@@ -168,7 +169,7 @@ public:
     int cpuUsage() const;
     const std::string userName() const;
     long unsigned int vmSize() const;
-
+    long long unsigned int startTime() const;
 
 
 private:
