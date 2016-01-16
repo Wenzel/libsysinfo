@@ -157,7 +157,7 @@ public:
     pid_t pid() const;
     pid_t ppid() const;
     int sid() const;
-    const std::string& ttyNr() const;
+    const std::string ttyNr() const;
     int tpgid() const;
     const std::vector<int>& uids() const;
     const std::vector<int>& gids() const;

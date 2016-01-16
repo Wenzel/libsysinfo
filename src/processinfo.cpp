@@ -5,6 +5,9 @@
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string.hpp>
 
+#include <fcntl.h>
+#include <sys/stat.h>
+
 #include "processinfo.h"
 
 // static init
@@ -18,7 +21,7 @@ std::ostream& operator<<(std::ostream& os, const ProcessInfo& p)
     os << "Parent PID : " << p.ppid() << std::endl;
     os << "Process Group ID : " << p.m_pgrp << std::endl;
     os << "Session ID : " << p.sid() << std::endl;
-    // os << "Controlling tty : " << p.ttyNr() << std::endl;
+    os << "Controlling tty : " << "Major : " << MAJOR(p.m_tty_nr) << ", Minor : " << MINOR(p.m_tty_nr) << " (" << p.ttyNr() << ")" << std::endl;
 
     return os;
 }
@@ -64,10 +67,42 @@ const std::string ProcessInfo::userName() const
 long unsigned int ProcessInfo::vmSize() const { return m_vmsize; }
 int ProcessInfo::ppid() const { return m_ppid; }
 int ProcessInfo::sid() const { return m_session; }
-const std::string& ProcessInfo::ttyNr() const {
-    int major = MAJOR(m_tty_nr);
-    int minor = MINOR(m_tty_nr);
-    // std::cout << major << ", " << minor << std::endl;
+const std::string ProcessInfo::ttyNr() const {
+    // /dev/tty* ?
+    boost::filesystem::path path("/dev");
+    boost::filesystem::directory_iterator end_itr;
+    for (boost::filesystem::directory_iterator itr(path);
+         itr != end_itr;
+         ++itr)
+    {
+        if (boost::regex_match(itr->path().filename().string(), boost::regex("^tty\\d*$")))
+        {
+            // stat
+            struct stat st;
+            if (stat(itr->path().string().c_str(), &st) == 0)
+            {
+                // corresponding st_dev ?
+                if (m_tty_nr == st.st_rdev)
+                    return itr->path().string();
+            }
+        }
+    }
+    // /dev/pts ?
+    path = "/dev/pts";
+    for (boost::filesystem::directory_iterator itr(path);
+         itr != end_itr;
+         ++itr)
+    {
+        // stat
+        struct stat st;
+        if (stat(itr->path().string().c_str(), &st) == 0)
+        {
+            // corresponding st_rdev ?
+            if (m_tty_nr == st.st_rdev)
+                return itr->path().string();
+        }
+    }
+    return std::string();
 }
 
 int ProcessInfo::tpgid() const { return m_tpgid; }
