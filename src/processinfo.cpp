@@ -25,6 +25,11 @@ std::ostream& operator<<(std::ostream& os, const ProcessInfo& p)
     os << "Controlling tty : " << "Major : " << MAJOR(p.m_tty_nr) << ", Minor : " << MINOR(p.m_tty_nr) << " (" << p.ttyNr() << ")" << std::endl;
     os << "starttime : " << "jiffies : " << p.m_starttime << ", diff : " << p.startTime() << std::endl;
     os << "Threads : " << p.m_num_threads << std::endl;
+    os << "Opened Files :" << std::endl;
+    const std::unordered_map<int, std::string>& fds = p.fds();
+    std::unordered_map<int, std::string>::const_iterator it;
+    for (it = fds.begin(); it != fds.end(); it++)
+        os << "[" << it->first << "]" << " => " << it->second << std::endl;
     return os;
 }
 

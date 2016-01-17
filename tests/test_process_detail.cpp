@@ -13,7 +13,7 @@ int main(int argc, char* argv[])
     }
 
     int pid = atoi(argv[1]);
-    ProcessInfo pinfo(pid);
+    ProcessInfo pinfo(pid, true);
     std::cout << pinfo << std::endl;
 
     return 0;
