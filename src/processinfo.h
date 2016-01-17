@@ -158,6 +158,7 @@ public:
     long unsigned int vmSize() const;
     long long unsigned int startTime() const;
     const std::unordered_map<int, std::string>& fds();
+    const std::string& state() const;
 
 
 private:
