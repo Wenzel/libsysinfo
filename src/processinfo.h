@@ -11,20 +11,6 @@
 #include <pwd.h>
 #include <linux/kdev_t.h>
 
-enum process_status
-{
-    running,
-    sleeping,
-    disk_sleep,
-    stopped,
-    tracing_stop,
-    zombie,
-    dead,
-    wakekill,
-    waking,
-    parked
-};
-
 struct io_stat
 {
     /* characters read */
@@ -200,7 +186,7 @@ private:
     std::string m_proc_path;
     pid_t m_pid;
     std::string m_name;
-    process_status m_status;
+    std::string m_state;
     std::vector<std::string> m_cmdline;
     std::string m_cwd;
     std::string m_root;

@@ -164,28 +164,22 @@ void ProcessInfo::readStat()
     this->m_name.erase(std::remove(this->m_name.begin(), this->m_name.end(), '('), this->m_name.end());
     this->m_name.erase(std::remove(this->m_name.begin(), this->m_name.end(), ')'), this->m_name.end());
     // status
-    std::string status;
-    if_stat >> status;
-    if (status == "R")
-        this->m_status = running;
-    else if (status == "S")
-        this->m_status = sleeping;
-    else if (status == "D")
-        this->m_status = disk_sleep;
-    else if (status == "Z")
-        this->m_status = zombie;
-    else if (status == "T")
-        this->m_status = stopped;
-    else if (status == "t")
-        this->m_status = tracing_stop;
-    else if (status == "W")
-        this->m_status = waking;
-    else if (status == "X" or status == "x")
-        this->m_status = dead;
-    else if (status == "K")
-        this->m_status = wakekill;
-    else if (status == "P")
-        this->m_status = parked;
+    std::string state;
+    if_stat >> state;
+    if (state == "R")
+        this->m_state = "Running";
+    else if (state == "S")
+        this->m_state = "Sleeping";
+    else if (state == "D")
+        this->m_state = "Disk sleep";
+    else if (state == "Z")
+        this->m_state = "Zombie";
+    else if (state == "T")
+        this->m_state = "Stopped";
+    else if (state == "W")
+        this->m_state = "Waking";
+    else
+        this->m_state = state;
 
     if_stat >> this->m_ppid;
     if_stat >> this->m_pgid;
@@ -297,7 +291,7 @@ void ProcessInfo::readIo()
         if (key == "rchar")
             this->m_io.rchar = std::stol(value);
         else if (key == "wchar")
-            this->m_io.wchar = sleeping; // TODO
+            this->m_io.wchar = std::stol(value);
         else if (key == "syscr")
             this->m_io.syscr = std::stol(value);
         else if (key == "syscw")
