@@ -133,6 +133,15 @@ const std::unordered_map<int, std::string>& ProcessInfo::fds()
 }
 const std::string& ProcessInfo::state() const { return m_state; }
 unsigned int ProcessInfo::flags() const { return m_flags; }
+long unsigned int ProcessInfo::minflt() const { return m_minflt; }
+long unsigned int ProcessInfo::cminflt() const{ return m_cminflt; }
+long unsigned int ProcessInfo::majflt() const{ return m_majflt; }
+long unsigned int ProcessInfo::cmajflt() const{ return m_cmajflt; }
+long unsigned int ProcessInfo::utime() const{ return m_utime; }
+long unsigned int ProcessInfo::stime() const{ return m_stime; }
+long unsigned int ProcessInfo::cutime() const{ return m_cutime; }
+long unsigned int ProcessInfo::cstime() const{ return m_cstime; }
+
 
 void ProcessInfo::readSymlinks()
 {

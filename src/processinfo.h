@@ -192,6 +192,14 @@ public:
     const std::unordered_map<int, std::string>& fds();
     const std::string& state() const;
     unsigned int flags() const;
+    long unsigned int minflt() const;
+    long unsigned int cminflt() const;
+    long unsigned int majflt() const;
+    long unsigned int cmajflt() const;
+    long unsigned int utime() const;
+    long unsigned int stime() const;
+    long unsigned int cutime() const;
+    long unsigned int cstime() const;
 
 private:
     // static
