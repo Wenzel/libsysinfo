@@ -26,3 +26,6 @@ TODO
 
 - bad function name for getters in ProcessInfo
 - check refs
+- review fields type
+- check nbCore when updating cpu usage
+- reorder getters
