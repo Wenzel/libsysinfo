@@ -151,7 +151,7 @@ class ProcessInfo
 {
 
 public:
-    ProcessInfo(pid_t pid, bool detail = false);
+    ProcessInfo(pid_t pid);
 
     // getters
     pid_t pid() const;
@@ -166,12 +166,12 @@ public:
     const std::string cmdline() const;
     const std::string cwd() const;    const std::string root() const;
     const std::string exe() const;
-    const std::unordered_map<std::string, std::string> environ() const;
+    const std::unordered_map<std::string, std::string> environ();
     int cpuUsage() const;
     const std::string userName() const;
     long unsigned int vmSize() const;
     long long unsigned int startTime() const;
-    const std::unordered_map<int, std::string>& fds() const;
+    const std::unordered_map<int, std::string>& fds();
 
 
 private:
@@ -186,7 +186,6 @@ private:
     void readEnviron();
     void readIo();
     void updateCPUUsage();
-    void detailedInfo();
     void readFd();
     void readCgroup();
     void readSmaps();
@@ -195,7 +194,7 @@ private:
 
 
     // friend
-    friend std::ostream & operator<<(std::ostream &os, const ProcessInfo& p);
+    friend std::ostream & operator<<(std::ostream &os, ProcessInfo& p);
 
     // main properties
     std::string m_proc_path;

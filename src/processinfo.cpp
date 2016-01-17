@@ -15,7 +15,7 @@
 std::unordered_map<int, struct old_cpu_time_t> ProcessInfo::map_pid_usage;
 
 // overload operator<<
-std::ostream& operator<<(std::ostream& os, const ProcessInfo& p)
+std::ostream& operator<<(std::ostream& os, ProcessInfo& p)
 {
     os << "Name : " << p.name() << std::endl;
     os << "PID : " << p.pid() << std::endl;
@@ -33,7 +33,7 @@ std::ostream& operator<<(std::ostream& os, const ProcessInfo& p)
     return os;
 }
 
-ProcessInfo::ProcessInfo(pid_t pid, bool detail)
+ProcessInfo::ProcessInfo(pid_t pid)
 {
     this->m_pid = pid;
     this->m_proc_path = "/proc/" + std::to_string(pid) + "/";
@@ -41,12 +41,8 @@ ProcessInfo::ProcessInfo(pid_t pid, bool detail)
     readCmdline();
     readStat();
     readStatus();
-    readEnviron();
     readIo();
     updateCPUUsage();
-
-    if (detail)
-        detailedInfo();
 }
 
 // getters
@@ -63,7 +59,11 @@ const std::string ProcessInfo::cmdline() const
 const std::string ProcessInfo::cwd() const { return m_cwd; }
 const std::string ProcessInfo::root() const { return m_root; }
 const std::string ProcessInfo::exe() const { return m_exe; }
-const std::unordered_map<std::string, std::string> ProcessInfo::environ() const { return m_environ; }
+const std::unordered_map<std::string, std::string> ProcessInfo::environ()
+{
+    readEnviron();
+    return m_environ;
+}
 int ProcessInfo::cpuUsage() const { return m_cpu_usage; }
 const std::string ProcessInfo::userName() const
 {
@@ -126,7 +126,11 @@ long long unsigned int ProcessInfo::startTime() const {
     return diff;
 
 }
-const std::unordered_map<int, std::string>& ProcessInfo::fds() const { return m_fds; }
+const std::unordered_map<int, std::string>& ProcessInfo::fds()
+{
+    readFd();
+    return m_fds;
+}
 
 void ProcessInfo::readSymlinks()
 {
@@ -356,14 +360,6 @@ void ProcessInfo::updateCPUUsage()
     this->m_cpu_usage = cpu_usage;
 }
 
-void ProcessInfo::detailedInfo()
-{
-    readFd();
-    readCgroup();
-    readSmaps();
-    readLimits();
-    readStack();
-}
 
 void ProcessInfo::readFd()
 {

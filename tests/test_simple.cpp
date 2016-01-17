@@ -17,9 +17,7 @@ int main()
     for (ProcessInfo pinfo : process_list)
         std::cout << pinfo << std::endl;
 
-
-    // get detailed info
-    ProcessInfo pinfo(pid, true);
+    ProcessInfo pinfo(pid);
 
     /*
     std::cout << "details for PID : " << pid << std::endl;
