@@ -121,6 +121,7 @@ long long unsigned int ProcessInfo::startTime() const {
     return diff;
 
 }
+const std::unordered_map<int, std::string>& ProcessInfo::fds() const { return m_fds; }
 
 void ProcessInfo::readSymlinks()
 {
