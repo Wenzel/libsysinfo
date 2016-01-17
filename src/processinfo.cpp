@@ -132,7 +132,7 @@ const std::unordered_map<int, std::string>& ProcessInfo::fds()
     return m_fds;
 }
 const std::string& ProcessInfo::state() const { return m_state; }
-
+unsigned int ProcessInfo::flags() const { return m_flags; }
 
 void ProcessInfo::readSymlinks()
 {
