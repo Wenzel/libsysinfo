@@ -20,3 +20,9 @@ Run
 
     ./_build/tests/test_simple
     ./_build/tests/gui_qml/test_gui_qml   
+
+TODO
+----
+
+- bad function name for getters in ProcessInfo
+- check refs
