@@ -138,6 +138,15 @@ long unsigned int ProcessInfo::utime() const{ return m_utime; }
 long unsigned int ProcessInfo::stime() const{ return m_stime; }
 long unsigned int ProcessInfo::cutime() const{ return m_cutime; }
 long unsigned int ProcessInfo::cstime() const{ return m_cstime; }
+long unsigned int ProcessInfo::guestTime() const{ return m_guest_time; }
+long unsigned int ProcessInfo::cguestTime() const{ return m_cguest_time; }
+long int ProcessInfo::priority() const { return m_priority; }
+unsigned int ProcessInfo::rtPriority() const { return m_rt_priority; }
+long int ProcessInfo::nice() const { return m_nice; }
+long int ProcessInfo::numThreads() const { return m_num_threads; }
+int ProcessInfo::processor() const { return m_processor; }
+long long unsigned int ProcessInfo::delayacctBlkioTicks() const { return m_delayacct_blkio_ticks; }
+
 
 
 void ProcessInfo::readSymlinks()

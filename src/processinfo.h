@@ -200,6 +200,16 @@ public:
     long unsigned int stime() const;
     long unsigned int cutime() const;
     long unsigned int cstime() const;
+    long unsigned int guestTime() const;
+    long unsigned int cguestTime() const;
+    long int priority() const;
+    unsigned int rtPriority() const;
+    long int nice() const;
+    long int numThreads() const;
+    int processor() const;
+    long long unsigned int delayacctBlkioTicks() const;
+
+
 
 private:
     // static
