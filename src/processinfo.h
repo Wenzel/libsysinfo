@@ -43,6 +43,14 @@
 #define PF_SUSPEND_TASK 0x80000000      /* this thread called freeze_processes and should not be frozen */
 
 
+#define SCHED_NORMAL            0
+#define SCHED_FIFO              1
+#define SCHED_RR                2
+#define SCHED_BATCH             3
+/* SCHED_ISO: reserved but not implemented yet */
+#define SCHED_IDLE              5
+#define SCHED_DEADLINE          6
+
 struct io_stat
 {
     /* characters read */
@@ -208,7 +216,7 @@ public:
     long int numThreads() const;
     int processor() const;
     long long unsigned int delayacctBlkioTicks() const;
-
+    std::string policy() const;
 
 
 private:

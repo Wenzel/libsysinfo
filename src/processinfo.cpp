@@ -146,7 +146,25 @@ long int ProcessInfo::nice() const { return m_nice; }
 long int ProcessInfo::numThreads() const { return m_num_threads; }
 int ProcessInfo::processor() const { return m_processor; }
 long long unsigned int ProcessInfo::delayacctBlkioTicks() const { return m_delayacct_blkio_ticks; }
-
+std::string ProcessInfo::policy() const
+{
+    switch (m_policy)
+    {
+    case SCHED_NORMAL:
+        return "SCHED_NORMAL";
+    case SCHED_FIFO:
+        return "SCHED_FIFO";
+    case SCHED_RR:
+        return "SCHED_RR";
+    case SCHED_BATCH:
+        return "SCHED_BATCH";
+    case SCHED_IDLE:
+        return "SCHED_IDLE";
+    case SCHED_DEADLINE:
+        return "SCHED_DEADLINE";
+    }
+    return std::string();
+}
 
 
 void ProcessInfo::readSymlinks()
