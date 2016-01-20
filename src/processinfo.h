@@ -181,7 +181,7 @@ public:
     const std::vector<int>& uids() const;
     const std::vector<int>& gids() const;
     const std::string name() const;
-    const std::string cmdline() const;
+    const std::vector<std::string>& cmdline() const;
     const std::string cwd() const;    const std::string root() const;
     const std::string exe() const;
     const std::unordered_map<std::string, std::string> environ();

@@ -48,12 +48,9 @@ ProcessInfo::ProcessInfo(pid_t pid)
 // getters
 pid_t ProcessInfo::pid() const { return m_pid; }
 const std::string ProcessInfo::name() const { return  m_name; }
-const std::string ProcessInfo::cmdline() const
+const std::vector<std::string>& ProcessInfo::cmdline() const
 {
-    const char* delim = " ";
-    std::stringstream res;
-    std::copy(m_cmdline.begin(), m_cmdline.end(), std::ostream_iterator<std::string>(res, delim));
-    return res.str();
+    return m_cmdline;
 }
 
 const std::string ProcessInfo::cwd() const { return m_cwd; }
