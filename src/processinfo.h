@@ -179,53 +179,74 @@ class ProcessInfo
 public:
     ProcessInfo(pid_t pid);
 
+    void needUpdate();
+
     // getters
+    // from stat
     pid_t pid() const;
-    pid_t ppid() const;
-    int pgid() const;
-    int sid() const;
-    const std::string ttyNr() const;
-    int tpgid() const;
-    const std::vector<int>& uids() const;
-    const std::vector<int>& gids() const;
-    const std::string name() const;
-    const std::vector<std::string>& cmdline() const;
-    const std::string cwd() const;    const std::string root() const;
-    const std::string exe() const;
+    const std::string name();
+    const std::string& state();
+    pid_t ppid();
+    int pgid();
+    int sid();
+    const std::string ttyNr();
+    int tpgid();
+    unsigned int flags();
+    long unsigned int minflt();
+    long unsigned int cminflt();
+    long unsigned int majflt();
+    long unsigned int cmajflt();
+    long unsigned int utime();
+    long unsigned int stime();
+    long unsigned int cutime();
+    long unsigned int cstime();
+    long int priority();
+    long int nice();
+    long int numThreads();
+    long long unsigned int startTime();
+    long unsigned int vmSize();
+    int processor();
+    unsigned int rtPriority();
+    std::string policy();
+    long long unsigned int delayacctBlkioTicks();
+    long unsigned int guestTime();
+    long unsigned int cguestTime();
+
+    // from status
+    const std::vector<int>& uids();
+    const std::vector<int>& gids();
+
+    // from cmdline
+    const std::vector<std::string>& cmdline();
+
+    // from cwd
+    const std::string cwd();
+
+    // from exe
+    const std::string exe();
+
+    // from root
+    const std::string root();
+
+    // from environ
     const std::unordered_map<std::string, std::string> environ();
+
+    // from fd/
+    const std::unordered_map<int, std::string>& fds();
+
+    // computed
     int cpuUsage() const;
     const std::string userName() const;
-    long unsigned int vmSize() const;
-    long long unsigned int startTime() const;
-    const std::unordered_map<int, std::string>& fds();
-    const std::string& state() const;
-    unsigned int flags() const;
-    long unsigned int minflt() const;
-    long unsigned int cminflt() const;
-    long unsigned int majflt() const;
-    long unsigned int cmajflt() const;
-    long unsigned int utime() const;
-    long unsigned int stime() const;
-    long unsigned int cutime() const;
-    long unsigned int cstime() const;
-    long unsigned int guestTime() const;
-    long unsigned int cguestTime() const;
-    long int priority() const;
-    unsigned int rtPriority() const;
-    long int nice() const;
-    long int numThreads() const;
-    int processor() const;
-    long long unsigned int delayacctBlkioTicks() const;
-    std::string policy() const;
-
 
 private:
     // static
     static std::unordered_map<int, struct old_cpu_time_t> map_pid_usage;
 
     // functions
-    void readSymlinks();
+    void readCwd();
     void readCmdline();
+    void readExe();
+    void readRoot();
     void readStat();
     void readStatus();
     void readEnviron();
@@ -243,6 +264,17 @@ private:
 
     // properties
     std::string m_proc_path;
+    bool m_need_update_stat;
+    bool m_need_update_status;
+    bool m_need_update_io;
+    bool m_need_update_cwd;
+    bool m_need_update_exe;
+    bool m_need_update_cmdline;
+    bool m_need_update_root;
+    bool m_need_update_environ;
+    bool m_need_update_fd;
+
+
     // from stat
     pid_t m_pid;
     std::string m_name;

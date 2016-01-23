@@ -35,44 +35,96 @@ std::ostream& operator<<(std::ostream& os, ProcessInfo& p)
 
 ProcessInfo::ProcessInfo(pid_t pid)
 {
-    this->m_pid = pid;
-    this->m_proc_path = "/proc/" + std::to_string(pid) + "/";
-    readSymlinks();
-    readCmdline();
-    readStat();
-    readStatus();
-    readIo();
-    updateCPUUsage();
+    m_pid = pid;
+    m_proc_path = "/proc/" + std::to_string(pid) + "/";
+    m_need_update_stat = false;
+    m_need_update_status = false;
+    m_need_update_io = false;
+    m_need_update_cwd = false;
+    m_need_update_exe = false;
+    m_need_update_cmdline = false;
+    m_need_update_root = false;
+    m_need_update_environ = false;
+    m_need_update_fd = false;
+
+    this->needUpdate();
+}
+
+void ProcessInfo::needUpdate()
+{
+    m_need_update_stat = true;
+    m_need_update_status = true;
+    m_need_update_io = true;
+    m_need_update_cwd = true;
+    m_need_update_exe = true;
+    m_need_update_cmdline = true;
+    m_need_update_root = true;
+    m_need_update_environ = true;
+    m_need_update_fd = true;
 }
 
 // getters
+// from stat
 pid_t ProcessInfo::pid() const { return m_pid; }
-const std::string ProcessInfo::name() const { return  m_name; }
-const std::vector<std::string>& ProcessInfo::cmdline() const
+
+const std::string ProcessInfo::name()
 {
-    return m_cmdline;
+    if (m_need_update_stat)
+    {
+        readStat();
+        m_need_update_stat = false;
+    }
+    return  m_name;
 }
 
-const std::string ProcessInfo::cwd() const { return m_cwd; }
-const std::string ProcessInfo::root() const { return m_root; }
-const std::string ProcessInfo::exe() const { return m_exe; }
-const std::unordered_map<std::string, std::string> ProcessInfo::environ()
+const std::string& ProcessInfo::state()
 {
-    readEnviron();
-    return m_environ;
+    if (m_need_update_stat)
+    {
+        readStat();
+        m_need_update_stat = false;
+    }
+    return m_state;
 }
-int ProcessInfo::cpuUsage() const { return m_cpu_usage; }
-const std::string ProcessInfo::userName() const
+
+int ProcessInfo::ppid()
 {
-    struct passwd* pass;
-    pass = getpwuid(m_uids[0]); // real uid
-    return std::string(pass->pw_name);
+    if (m_need_update_stat)
+    {
+        readStat();
+        m_need_update_stat = false;
+    }
+    return m_ppid;
 }
-long unsigned int ProcessInfo::vmSize() const { return m_vmsize; }
-int ProcessInfo::ppid() const { return m_ppid; }
-int ProcessInfo::pgid() const { return m_pgid; }
-int ProcessInfo::sid() const { return m_session; }
-const std::string ProcessInfo::ttyNr() const {
+
+int ProcessInfo::pgid()
+{
+    if (m_need_update_stat)
+    {
+        readStat();
+        m_need_update_stat = false;
+    }
+    return m_pgid;
+}
+
+int ProcessInfo::sid()
+{
+    if (m_need_update_stat)
+    {
+        readStat();
+        m_need_update_stat = false;
+    }
+    return m_session;
+}
+
+const std::string ProcessInfo::ttyNr()
+{
+    if (m_need_update_stat)
+    {
+        readStat();
+        m_need_update_stat = false;
+    }
+
     // /dev/tty* ?
     boost::filesystem::path path("/dev");
     boost::filesystem::directory_iterator end_itr;
@@ -109,10 +161,144 @@ const std::string ProcessInfo::ttyNr() const {
     }
     return std::string();
 }
-int ProcessInfo::tpgid() const { return m_tpgid; }
-const std::vector<int>& ProcessInfo::uids() const { return m_uids; }
-const std::vector<int>& ProcessInfo::gids() const { return m_gids; }
-long long unsigned int ProcessInfo::startTime() const {
+
+int ProcessInfo::tpgid()
+{
+    if (m_need_update_stat)
+    {
+        readStat();
+        m_need_update_stat = false;
+    }
+    return m_tpgid;
+}
+
+unsigned int ProcessInfo::flags()
+{
+    if (m_need_update_stat)
+    {
+        readStat();
+        m_need_update_stat = false;
+    }
+    return m_flags;
+}
+
+long unsigned int ProcessInfo::minflt()
+{
+    if (m_need_update_stat)
+    {
+        readStat();
+        m_need_update_stat = false;
+    }
+    return m_minflt;
+}
+
+long unsigned int ProcessInfo::cminflt()
+{
+    if (m_need_update_stat)
+    {
+        readStat();
+        m_need_update_stat = false;
+    }
+    return m_cminflt;
+}
+
+long unsigned int ProcessInfo::majflt()
+{
+    if (m_need_update_stat)
+    {
+        readStat();
+        m_need_update_stat = false;
+    }
+    return m_majflt;
+}
+
+long unsigned int ProcessInfo::cmajflt()
+{
+    if (m_need_update_stat)
+    {
+        readStat();
+        m_need_update_stat = false;
+    }
+    return m_cmajflt;
+}
+
+long unsigned int ProcessInfo::utime()
+{
+    if (m_need_update_stat)
+    {
+        readStat();
+        m_need_update_stat = false;
+    }
+    return m_utime;
+}
+
+long unsigned int ProcessInfo::stime()
+{
+    if (m_need_update_stat)
+    {
+        readStat();
+        m_need_update_stat = false;
+    }
+    return m_stime;
+}
+
+long unsigned int ProcessInfo::cutime()
+{
+    if (m_need_update_stat)
+    {
+        readStat();
+        m_need_update_stat = false;
+    }
+    return m_cutime;
+}
+
+long unsigned int ProcessInfo::cstime()
+{
+    if (m_need_update_stat)
+    {
+        readStat();
+        m_need_update_stat = false;
+    }
+    return m_cstime;
+}
+
+long int ProcessInfo::priority()
+{
+    if (m_need_update_stat)
+    {
+        readStat();
+        m_need_update_stat = false;
+    }
+    return m_priority;
+}
+
+long int ProcessInfo::nice()
+{
+    if (m_need_update_stat)
+    {
+        readStat();
+        m_need_update_stat = false;
+    }
+    return m_nice;
+}
+
+long int ProcessInfo::numThreads()
+{
+    if (m_need_update_stat)
+    {
+        readStat();
+        m_need_update_stat = false;
+    }
+    return m_num_threads;
+}
+
+long long unsigned int ProcessInfo::startTime()
+{
+    if (m_need_update_stat)
+    {
+        readStat();
+        m_need_update_stat = false;
+    }
     // convert jiffies to seconds
     long hz = sysconf(_SC_CLK_TCK);
     long long unsigned int starttime_sec = m_starttime / hz;
@@ -123,31 +309,45 @@ long long unsigned int ProcessInfo::startTime() const {
     return diff;
 
 }
-const std::unordered_map<int, std::string>& ProcessInfo::fds()
+
+long unsigned int ProcessInfo::vmSize()
 {
-    readFd();
-    return m_fds;
+    if (m_need_update_stat)
+    {
+        readStat();
+        m_need_update_stat = false;
+    }
+    return m_vmsize;
 }
-const std::string& ProcessInfo::state() const { return m_state; }
-unsigned int ProcessInfo::flags() const { return m_flags; }
-long unsigned int ProcessInfo::minflt() const { return m_minflt; }
-long unsigned int ProcessInfo::cminflt() const{ return m_cminflt; }
-long unsigned int ProcessInfo::majflt() const{ return m_majflt; }
-long unsigned int ProcessInfo::cmajflt() const{ return m_cmajflt; }
-long unsigned int ProcessInfo::utime() const{ return m_utime; }
-long unsigned int ProcessInfo::stime() const{ return m_stime; }
-long unsigned int ProcessInfo::cutime() const{ return m_cutime; }
-long unsigned int ProcessInfo::cstime() const{ return m_cstime; }
-long unsigned int ProcessInfo::guestTime() const{ return m_guest_time; }
-long unsigned int ProcessInfo::cguestTime() const{ return m_cguest_time; }
-long int ProcessInfo::priority() const { return m_priority; }
-unsigned int ProcessInfo::rtPriority() const { return m_rt_priority; }
-long int ProcessInfo::nice() const { return m_nice; }
-long int ProcessInfo::numThreads() const { return m_num_threads; }
-int ProcessInfo::processor() const { return m_processor; }
-long long unsigned int ProcessInfo::delayacctBlkioTicks() const { return m_delayacct_blkio_ticks; }
-std::string ProcessInfo::policy() const
+
+int ProcessInfo::processor()
 {
+    if (m_need_update_stat)
+    {
+        readStat();
+        m_need_update_stat = false;
+    }
+    return m_processor;
+}
+
+unsigned int ProcessInfo::rtPriority()
+{
+    if (m_need_update_stat)
+    {
+        readStat();
+        m_need_update_stat = false;
+    }
+    return m_rt_priority;
+}
+
+std::string ProcessInfo::policy()
+{
+    if (m_need_update_stat)
+    {
+        readStat();
+        m_need_update_stat = false;
+    }
+
     switch (m_policy)
     {
     case SCHED_NORMAL:
@@ -166,17 +366,149 @@ std::string ProcessInfo::policy() const
     return std::string();
 }
 
-
-void ProcessInfo::readSymlinks()
+long long unsigned int ProcessInfo::delayacctBlkioTicks()
 {
-    // read cwd
+    if (m_need_update_stat)
+    {
+        readStat();
+        m_need_update_stat = false;
+    }
+    return m_delayacct_blkio_ticks;
+}
+
+long unsigned int ProcessInfo::guestTime()
+{
+    if (m_need_update_stat)
+    {
+        readStat();
+        m_need_update_stat = false;
+    }
+    return m_guest_time;
+}
+
+long unsigned int ProcessInfo::cguestTime()
+{
+    if (m_need_update_stat)
+    {
+        readStat();
+        m_need_update_stat = false;
+    }
+    return m_cguest_time;
+}
+
+
+// from cmdline
+const std::vector<std::string>& ProcessInfo::cmdline()
+{
+    if (m_need_update_cmdline)
+    {
+        readCmdline();
+        m_need_update_cmdline = false;
+    }
+    return m_cmdline;
+}
+
+// from cwd
+const std::string ProcessInfo::cwd()
+{
+    if (m_need_update_cwd)
+    {
+        readCwd();
+        m_need_update_cwd = false;
+    }
+    return m_cwd;
+}
+
+// from exe
+const std::string ProcessInfo::exe()
+{
+    if (m_need_update_exe)
+    {
+        readExe();
+        m_need_update_exe = false;
+    }
+    return m_exe;
+}
+
+// from root
+const std::string ProcessInfo::root()
+{
+    if (m_need_update_root)
+    {
+        readRoot();
+        m_need_update_root = false;
+    }
+    return m_root;
+}
+
+// from environ
+const std::unordered_map<std::string, std::string> ProcessInfo::environ()
+{
+    if (m_need_update_environ)
+    {
+        readEnviron();
+        m_need_update_environ = false;
+    }
+    return m_environ;
+}
+
+int ProcessInfo::cpuUsage() const { return m_cpu_usage; }
+
+// from status
+const std::string ProcessInfo::userName() const
+{
+    struct passwd* pass;
+    pass = getpwuid(m_uids[0]); // real uid
+    return std::string(pass->pw_name);
+}
+
+const std::vector<int>& ProcessInfo::uids()
+{
+    if (m_need_update_status)
+    {
+        readStatus();
+        m_need_update_status = false;
+    }
+    return m_uids;
+}
+
+const std::vector<int>& ProcessInfo::gids()
+{
+    if (m_need_update_status)
+    {
+        readStatus();
+        m_need_update_status = false;
+    }
+    return m_gids;
+}
+
+// from fd
+const std::unordered_map<int, std::string>& ProcessInfo::fds()
+{
+    if (m_need_update_fd)
+    {
+        readFd();
+        m_need_update_fd = false;
+    }
+    return m_fds;
+}
+
+// read*
+void ProcessInfo::readCwd()
+{
     boost::system::error_code ec;
     this->m_cwd = boost::filesystem::read_symlink(m_proc_path + "cwd", ec).string();
+}
 
-    // read exe
+void ProcessInfo::readExe()
+{
+    boost::system::error_code ec;
     this->m_exe = boost::filesystem::read_symlink(m_proc_path + "exe", ec).string();
+}
 
-    // read root
+void ProcessInfo::readRoot()
+{
+    boost::system::error_code ec;
     this->m_root = boost::filesystem::read_symlink(m_proc_path + "root", ec).string();
 }
 
@@ -266,6 +598,8 @@ void ProcessInfo::readStat()
     if_stat >> this->m_env_end;
     if_stat >> this->m_exit_code;
     if_stat.close();
+
+    updateCPUUsage();
 }
 
 void ProcessInfo::readStatus()
@@ -340,55 +674,6 @@ void ProcessInfo::readIo()
     }
     if_io.close();
 }
-
-void ProcessInfo::updateCPUUsage()
-{
-    int cpu_usage = 0;
-
-    // read /proc/stat
-    std::ifstream if_cpu_stat("/proc/stat");
-    std::string tmp;
-    if_cpu_stat >> tmp;
-    long long unsigned user,nice,system,idle,cpu_total_time;
-    user = 0;
-    if_cpu_stat >> user;
-    if_cpu_stat >> nice;
-    if_cpu_stat >> system;
-    if_cpu_stat >> idle;
-    if_cpu_stat.close();
-    // get cpu_total_time
-    cpu_total_time = user + nice + system + idle;
-
-    // get process_total_time
-    long long unsigned process_total_time = this->m_utime + this->m_stime;
-    struct old_cpu_time_t old_cpu_time;
-
-
-    if (ProcessInfo::map_pid_usage.find(this->m_pid) == map_pid_usage.end())
-    {
-        // insert
-        old_cpu_time.cpu_total_time = cpu_total_time;
-        old_cpu_time.proc_total_time = process_total_time;
-        ProcessInfo::map_pid_usage[this->m_pid] = old_cpu_time;
-    }
-    else
-    {
-        // retrieve old value
-        old_cpu_time = ProcessInfo::map_pid_usage[this->m_pid];
-        long long unsigned delta_cpu_time = cpu_total_time - old_cpu_time.cpu_total_time;
-        long long unsigned delta_process_time = process_total_time - old_cpu_time.proc_total_time;
-        if (delta_cpu_time != 0)
-            cpu_usage = 100 * 8 * delta_process_time / delta_cpu_time; // TODO cache getNbCores()
-
-        // update old values
-        old_cpu_time.cpu_total_time = cpu_total_time;
-        old_cpu_time.proc_total_time = process_total_time;
-        ProcessInfo::map_pid_usage[this->m_pid] = old_cpu_time;
-    }
-
-    this->m_cpu_usage = cpu_usage;
-}
-
 
 void ProcessInfo::readFd()
 {
@@ -635,4 +920,53 @@ void ProcessInfo::readStack()
         }
     }
     if_stack.close();
+}
+
+
+void ProcessInfo::updateCPUUsage()
+{
+    int cpu_usage = 0;
+
+    // read /proc/stat
+    std::ifstream if_cpu_stat("/proc/stat");
+    std::string tmp;
+    if_cpu_stat >> tmp;
+    long long unsigned user,nice,system,idle,cpu_total_time;
+    user = 0;
+    if_cpu_stat >> user;
+    if_cpu_stat >> nice;
+    if_cpu_stat >> system;
+    if_cpu_stat >> idle;
+    if_cpu_stat.close();
+    // get cpu_total_time
+    cpu_total_time = user + nice + system + idle;
+
+    // get process_total_time
+    long long unsigned process_total_time = this->m_utime + this->m_stime;
+    struct old_cpu_time_t old_cpu_time;
+
+
+    if (ProcessInfo::map_pid_usage.find(this->m_pid) == map_pid_usage.end())
+    {
+        // insert
+        old_cpu_time.cpu_total_time = cpu_total_time;
+        old_cpu_time.proc_total_time = process_total_time;
+        ProcessInfo::map_pid_usage[this->m_pid] = old_cpu_time;
+    }
+    else
+    {
+        // retrieve old value
+        old_cpu_time = ProcessInfo::map_pid_usage[this->m_pid];
+        long long unsigned delta_cpu_time = cpu_total_time - old_cpu_time.cpu_total_time;
+        long long unsigned delta_process_time = process_total_time - old_cpu_time.proc_total_time;
+        if (delta_cpu_time != 0)
+            cpu_usage = 100 * 8 * delta_process_time / delta_cpu_time; // TODO cache getNbCores()
+
+        // update old values
+        old_cpu_time.cpu_total_time = cpu_total_time;
+        old_cpu_time.proc_total_time = process_total_time;
+        ProcessInfo::map_pid_usage[this->m_pid] = old_cpu_time;
+    }
+
+    this->m_cpu_usage = cpu_usage;
 }
