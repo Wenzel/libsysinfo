@@ -455,8 +455,13 @@ const std::unordered_map<std::string, std::string> ProcessInfo::environ()
 int ProcessInfo::cpuUsage() const { return m_cpu_usage; }
 
 // from status
-const std::string ProcessInfo::userName() const
+const std::string ProcessInfo::userName()
 {
+    if (m_need_update_status)
+    {
+        readStatus();
+        m_need_update_status = false;
+    }
     struct passwd* pass;
     pass = getpwuid(m_uids[0]); // real uid
     return std::string(pass->pw_name);

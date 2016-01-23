@@ -236,7 +236,7 @@ public:
 
     // computed
     int cpuUsage() const;
-    const std::string userName() const;
+    const std::string userName();
 
 private:
     // static
