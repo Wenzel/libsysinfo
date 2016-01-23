@@ -618,6 +618,127 @@ const std::vector<int>& ProcessInfo::gids()
     return m_gids;
 }
 
+long unsigned int ProcessInfo::vmPeak()
+{
+    if (m_need_update_status)
+    {
+        readStatus();
+        m_need_update_status = false;
+    }
+    return m_vm_peak;
+}
+
+long unsigned int ProcessInfo::vmLck()
+{
+    if (m_need_update_status)
+    {
+        readStatus();
+        m_need_update_status = false;
+    }
+    return m_vm_lck;
+}
+
+long unsigned int ProcessInfo::vmPin()
+{
+    if (m_need_update_status)
+    {
+        readStatus();
+        m_need_update_status = false;
+    }
+    return m_vm_pin;
+}
+
+long unsigned int ProcessInfo::vmHwm()
+{
+    if (m_need_update_status)
+    {
+        readStatus();
+        m_need_update_status = false;
+    }
+    return m_vm_hwm;
+}
+
+long unsigned int ProcessInfo::vmRss()
+{
+    if (m_need_update_status)
+    {
+        readStatus();
+        m_need_update_status = false;
+    }
+    return m_vm_rss;
+}
+
+long unsigned int ProcessInfo::vmData()
+{
+    if (m_need_update_status)
+    {
+        readStatus();
+        m_need_update_status = false;
+    }
+    return m_vm_data;
+}
+
+long unsigned int ProcessInfo::vmStk()
+{
+    if (m_need_update_status)
+    {
+        readStatus();
+        m_need_update_status = false;
+    }
+    return m_vm_stk;
+}
+
+long unsigned int ProcessInfo::vmExe()
+{
+    if (m_need_update_status)
+    {
+        readStatus();
+        m_need_update_status = false;
+    }
+    return m_vm_exe;
+}
+
+long unsigned int ProcessInfo::vmLib()
+{
+    if (m_need_update_status)
+    {
+        readStatus();
+        m_need_update_status = false;
+    }
+    return m_vm_lib;
+}
+
+long unsigned int ProcessInfo::vmPte()
+{
+    if (m_need_update_status)
+    {
+        readStatus();
+        m_need_update_status = false;
+    }
+    return m_vm_pte;
+}
+
+long unsigned int ProcessInfo::vmPmd()
+{
+    if (m_need_update_status)
+    {
+        readStatus();
+        m_need_update_status = false;
+    }
+    return m_vm_pmd;
+}
+
+long unsigned int ProcessInfo::vmSwap()
+{
+    if (m_need_update_status)
+    {
+        readStatus();
+        m_need_update_status = false;
+    }
+    return m_vm_swap;
+}
+
+
 // from fd
 const std::unordered_map<int, std::string>& ProcessInfo::fds()
 {
@@ -756,20 +877,145 @@ void ProcessInfo::readStatus()
     std::string line;
     while (std::getline(if_status, line))
     {
-        // read uids and gids
-        boost::regex regex("^.?id:\\s+([[:digit:]]+)\\s+([[:digit:]]+)\\s+([[:digit:]]+)\\s+([[:digit:]]+)\\s*$");
+        // extract key / value
+        std::istringstream stream(line);
+        std::string key;
+        std::getline(stream, key, ':');
+        std::string value;
+        std::getline(stream, value);
+
+
+        // regex
+        boost::regex regex_uids("^\\s+([[:digit:]]+)\\s+([[:digit:]]+)\\s+([[:digit:]]+)\\s+([[:digit:]]+)\\s*$");
+        boost::regex regex_vm("^\\s+([[:digit:]]+)\\skB\\s*$");
         boost::smatch match;
-        if (boost::regex_match(line, match, regex))
+        if (key == "uids")
         {
-            if (match.size() == 4 + 1)
+            if (boost::regex_match(value, match, regex_uids))
             {
-                if (line.at(0) == 'U') // Uid
+                if (match.size() == 4 + 1)
                     for (int i = 0 ; i < 4 ; i++)
-                        this->m_uids.push_back(std::stoi(match[i + 1]));
-                else // Gid
-                    for (int i = 0 ; i < 4 ; i++)
-                        this->m_gids.push_back(std::stoi(match[i + 1]));
+                        m_uids.push_back(std::stoi(match[i + 1]));
             }
+            continue;
+        }
+        if (key == "gids")
+        {
+            if (boost::regex_match(value, match, regex_uids))
+            {
+                if (match.size() == 4 + 1)
+                    for (int i = 0 ; i < 4 ; i++)
+                        m_gids.push_back(std::stoi(match[i + 1]));
+            }
+            continue;
+        }
+        if (key == "VmPeak")
+        {
+            if (boost::regex_match(value, match, regex_vm))
+            {
+                if (match.size() == 1 + 1)
+                    m_vm_peak = std::stoi(match[1]);
+            }
+            continue;
+        }
+        if (key == "VmLck")
+        {
+            if (boost::regex_match(value, match, regex_vm))
+            {
+                if (match.size() == 1 + 1)
+                    m_vm_lck = std::stoi(match[1]);
+            }
+            continue;
+        }
+        if (key == "VmPin")
+        {
+            if (boost::regex_match(value, match, regex_vm))
+            {
+                if (match.size() == 1 + 1)
+                    m_vm_pin = std::stoi(match[1]);
+            }
+            continue;
+        }
+        if (key == "VmHWM")
+        {
+            if (boost::regex_match(value, match, regex_vm))
+            {
+                if (match.size() == 1 + 1)
+                    m_vm_hwm = std::stoi(match[1]);
+            }
+            continue;
+        }
+        if (key == "VmRSS")
+        {
+            if (boost::regex_match(value, match, regex_vm))
+            {
+                if (match.size() == 1 + 1)
+                    m_vm_rss = std::stoi(match[1]);
+            }
+            continue;
+        }
+        if (key == "VmData")
+        {
+            if (boost::regex_match(value, match, regex_vm))
+            {
+                if (match.size() == 1 + 1)
+                    m_vm_data = std::stoi(match[1]);
+            }
+            continue;
+        }
+        if (key == "VmStk")
+        {
+            if (boost::regex_match(value, match, regex_vm))
+            {
+                if (match.size() == 1 + 1)
+                    m_vm_stk = std::stoi(match[1]);
+            }
+            continue;
+        }
+        if (key == "VmExe")
+        {
+            if (boost::regex_match(value, match, regex_vm))
+            {
+                if (match.size() == 1 + 1)
+                    m_vm_exe = std::stoi(match[1]);
+            }
+            continue;
+        }
+        if (key == "VmLib")
+        {
+            if (boost::regex_match(value, match, regex_vm))
+            {
+                if (match.size() == 1 + 1)
+                    m_vm_lib = std::stoi(match[1]);
+            }
+            continue;
+        }
+        if (key == "VmPTE")
+        {
+            if (boost::regex_match(value, match, regex_vm))
+            {
+                if (match.size() == 1 + 1)
+                    m_vm_pte = std::stoi(match[1]);
+            }
+            continue;
+        }
+        if (key == "VmPMD")
+        {
+            if (boost::regex_match(value, match, regex_vm))
+            {
+                if (match.size() == 1 + 1)
+                    m_vm_pmd = std::stoi(match[1]);
+            }
+            continue;
+        }
+        if (key == "VmSwap")
+        {
+            if (boost::regex_match(value, match, regex_vm))
+            {
+                if (match.size() == 1 + 1)
+                    m_vm_swap = std::stoi(match[1]);
+            }
+            continue;
         }
     }
     if_status.close();

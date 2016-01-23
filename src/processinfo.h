@@ -228,6 +228,18 @@ public:
     // from status
     const std::vector<int>& uids();
     const std::vector<int>& gids();
+    long unsigned int vmPeak();
+    long unsigned int vmLck();
+    long unsigned int vmPin();
+    long unsigned int vmHwm();
+    long unsigned int vmRss();
+    long unsigned int vmData();
+    long unsigned int vmStk();
+    long unsigned int vmExe();
+    long unsigned int vmLib();
+    long unsigned int vmPte();
+    long unsigned int vmPmd();
+    long unsigned int vmSwap();
 
     // from cmdline
     const std::vector<std::string>& cmdline();
@@ -364,6 +376,19 @@ private:
     pid_t m_tracerpid;
     std::vector<int> m_uids;
     std::vector<int> m_gids;
+    long unsigned int m_vm_peak;
+    long unsigned int m_vm_lck;
+    long unsigned int m_vm_pin;
+    long unsigned int m_vm_hwm;
+    long unsigned int m_vm_rss;
+    long unsigned int m_vm_data;
+    long unsigned int m_vm_stk;
+    long unsigned int m_vm_exe;
+    long unsigned int m_vm_lib;
+    long unsigned int m_vm_pte;
+    long unsigned int m_vm_pmd;
+    long unsigned int m_vm_swap;
+    // computed
     int m_cpu_usage;
     /** cgroup **/
     std::vector<struct cgroup_hierarchy_t> m_cgroups;
