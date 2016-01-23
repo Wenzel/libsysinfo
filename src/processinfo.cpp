@@ -322,6 +322,56 @@ long unsigned int ProcessInfo::vmSize()
     return m_vmsize;
 }
 
+long unsigned int ProcessInfo::startCode()
+{
+    if (m_need_update_stat)
+    {
+        readStat();
+        m_need_update_stat = false;
+    }
+    return m_startcode;
+}
+
+long unsigned int ProcessInfo::endCode()
+{
+    if (m_need_update_stat)
+    {
+        readStat();
+        m_need_update_stat = false;
+    }
+    return m_endcode;
+}
+
+long unsigned int ProcessInfo::startStack()
+{
+    if (m_need_update_stat)
+    {
+        readStat();
+        m_need_update_stat = false;
+    }
+    return m_startstack;
+}
+
+long unsigned int ProcessInfo::kstkEsp()
+{
+    if (m_need_update_stat)
+    {
+        readStat();
+        m_need_update_stat = false;
+    }
+    return m_kstkesp;
+}
+
+long unsigned int ProcessInfo::kstkEip()
+{
+    if (m_need_update_stat)
+    {
+        readStat();
+        m_need_update_stat = false;
+    }
+    return m_kstkeip;
+}
+
 long unsigned int ProcessInfo::wchanAddr()
 {
     if (m_need_update_stat)
@@ -408,6 +458,75 @@ long unsigned int ProcessInfo::cguestTime()
     return m_cguest_time;
 }
 
+long unsigned int ProcessInfo::startData()
+{
+    if (m_need_update_stat)
+    {
+        readStat();
+        m_need_update_stat = false;
+    }
+    return m_start_data;
+}
+
+long unsigned int ProcessInfo::endData()
+{
+    if (m_need_update_stat)
+    {
+        readStat();
+        m_need_update_stat = false;
+    }
+    return m_end_data;
+}
+
+long unsigned int ProcessInfo::startBrk()
+{
+    if (m_need_update_stat)
+    {
+        readStat();
+        m_need_update_stat = false;
+    }
+    return m_start_brk;
+}
+
+long unsigned int ProcessInfo::startArg()
+{
+    if (m_need_update_stat)
+    {
+        readStat();
+        m_need_update_stat = false;
+    }
+    return m_arg_start;
+}
+
+long unsigned int ProcessInfo::endArg()
+{
+    if (m_need_update_stat)
+    {
+        readStat();
+        m_need_update_stat = false;
+    }
+    return m_arg_end;
+}
+
+long unsigned int ProcessInfo::startEnv()
+{
+    if (m_need_update_stat)
+    {
+        readStat();
+        m_need_update_stat = false;
+    }
+    return m_env_start;
+}
+
+long unsigned int ProcessInfo::endEnv()
+{
+    if (m_need_update_stat)
+    {
+        readStat();
+        m_need_update_stat = false;
+    }
+    return m_env_end;
+}
 
 // from cmdline
 const std::vector<std::string>& ProcessInfo::cmdline()

@@ -205,6 +205,11 @@ public:
     long int numThreads();
     long long unsigned int startTime();
     long unsigned int vmSize();
+    long unsigned int startCode();
+    long unsigned int endCode();
+    long unsigned int startStack();
+    long unsigned int kstkEsp();
+    long unsigned int kstkEip();
     long unsigned int wchanAddr();
     int processor();
     unsigned int rtPriority();
@@ -212,6 +217,13 @@ public:
     long long unsigned int delayacctBlkioTicks();
     long unsigned int guestTime();
     long unsigned int cguestTime();
+    long unsigned int startData();
+    long unsigned int endData();
+    long unsigned int startBrk();
+    long unsigned int startArg();
+    long unsigned int endArg();
+    long unsigned int startEnv();
+    long unsigned int endEnv();
 
     // from status
     const std::vector<int>& uids();
