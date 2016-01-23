@@ -885,7 +885,6 @@ void ProcessInfo::readStatus()
         std::string value;
         std::getline(stream, value);
 
-        std::cout << key << std::endl;
         // regex
         boost::regex regex_uids("^\\s+([[:digit:]]+)\\s+([[:digit:]]+)\\s+([[:digit:]]+)\\s+([[:digit:]]+)\\s*$");
         boost::regex regex_vm("^\\s+([[:digit:]]+)\\skB\\s*$");
