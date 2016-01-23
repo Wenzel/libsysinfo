@@ -30,6 +30,7 @@ std::ostream& operator<<(std::ostream& os, ProcessInfo& p)
     std::unordered_map<int, std::string>::const_iterator it;
     for (it = fds.begin(); it != fds.end(); it++)
         os << "[" << it->first << "]" << " => " << it->second << std::endl;
+    std::cout << "user name : " << p.userName() << std::endl;
     return os;
 }
 
@@ -884,12 +885,12 @@ void ProcessInfo::readStatus()
         std::string value;
         std::getline(stream, value);
 
-
+        std::cout << key << std::endl;
         // regex
         boost::regex regex_uids("^\\s+([[:digit:]]+)\\s+([[:digit:]]+)\\s+([[:digit:]]+)\\s+([[:digit:]]+)\\s*$");
         boost::regex regex_vm("^\\s+([[:digit:]]+)\\skB\\s*$");
         boost::smatch match;
-        if (key == "uids")
+        if (key == "Uid")
         {
             if (boost::regex_match(value, match, regex_uids))
             {
@@ -899,7 +900,7 @@ void ProcessInfo::readStatus()
             }
             continue;
         }
-        if (key == "gids")
+        if (key == "Gid")
         {
             if (boost::regex_match(value, match, regex_uids))
             {
