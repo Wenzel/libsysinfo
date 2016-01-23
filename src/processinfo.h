@@ -205,6 +205,7 @@ public:
     long int numThreads();
     long long unsigned int startTime();
     long unsigned int vmSize();
+    long unsigned int wchanAddr();
     int processor();
     unsigned int rtPriority();
     std::string policy();
@@ -234,6 +235,9 @@ public:
     // from fd/
     const std::unordered_map<int, std::string>& fds();
 
+    // from wchan
+    const std::string wchanName();
+
     // computed
     int cpuUsage() const;
     const std::string userName();
@@ -251,6 +255,7 @@ private:
     void readStatus();
     void readEnviron();
     void readIo();
+    void readWchan();
     void updateCPUUsage();
     void readFd();
     void readCgroup();
@@ -273,7 +278,7 @@ private:
     bool m_need_update_root;
     bool m_need_update_environ;
     bool m_need_update_fd;
-
+    bool m_need_update_wchan;
 
     // from stat
     pid_t m_pid;
@@ -341,6 +346,8 @@ private:
     std::unordered_map<std::string, std::string> m_environ;
     // from io
     struct io_stat m_io;
+    // from wchan
+    std::string m_wchan_name;
     // from status
     pid_t m_tracerpid;
     std::vector<int> m_uids;

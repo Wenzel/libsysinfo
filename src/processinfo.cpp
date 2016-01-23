@@ -46,6 +46,7 @@ ProcessInfo::ProcessInfo(pid_t pid)
     m_need_update_root = false;
     m_need_update_environ = false;
     m_need_update_fd = false;
+    m_need_update_wchan = false;
 
     this->needUpdate();
 }
@@ -61,6 +62,7 @@ void ProcessInfo::needUpdate()
     m_need_update_root = true;
     m_need_update_environ = true;
     m_need_update_fd = true;
+    m_need_update_wchan = true;
 }
 
 // getters
@@ -320,6 +322,16 @@ long unsigned int ProcessInfo::vmSize()
     return m_vmsize;
 }
 
+long unsigned int ProcessInfo::wchanAddr()
+{
+    if (m_need_update_stat)
+    {
+        readStat();
+        m_need_update_stat = false;
+    }
+    return m_wchan_addr;
+}
+
 int ProcessInfo::processor()
 {
     if (m_need_update_stat)
@@ -496,6 +508,17 @@ const std::unordered_map<int, std::string>& ProcessInfo::fds()
         m_need_update_fd = false;
     }
     return m_fds;
+}
+
+// from wchan
+const std::string ProcessInfo::wchanName()
+{
+    if (m_need_update_wchan)
+    {
+        readWchan();
+        m_need_update_wchan;
+    }
+    return m_wchan_name;
 }
 
 // read*
@@ -679,6 +702,13 @@ void ProcessInfo::readIo()
             this->m_io.cancelled_write_bytes = std::stol(value);
     }
     if_io.close();
+}
+
+void ProcessInfo::readWchan()
+{
+    std::ifstream if_wchan(m_proc_path + "wchan");
+    std::getline(if_wchan, m_wchan_name);
+    if_wchan.close();
 }
 
 void ProcessInfo::readFd()
