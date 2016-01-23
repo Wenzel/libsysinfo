@@ -520,9 +520,10 @@ void ProcessInfo::readRoot()
 void ProcessInfo::readCmdline()
 {
     std::ifstream if_cmdline(m_proc_path + "cmdline");
+    m_cmdline.clear();
     std::string cur_arg;
     while (getline(if_cmdline, cur_arg, '\0'))
-        this->m_cmdline.push_back(cur_arg);
+        m_cmdline.push_back(cur_arg);
     if_cmdline.close();
 }
 
