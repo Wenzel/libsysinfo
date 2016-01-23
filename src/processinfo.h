@@ -241,17 +241,76 @@ private:
     // friend
     friend std::ostream & operator<<(std::ostream &os, ProcessInfo& p);
 
-    // main properties
+    // properties
     std::string m_proc_path;
+    // from stat
     pid_t m_pid;
     std::string m_name;
     std::string m_state;
+    pid_t m_ppid;
+    pid_t m_pgid;
+    int m_session;
+    int m_tty_nr;
+    int m_tpgid;
+    unsigned int m_flags;
+    long unsigned int m_minflt;
+    long unsigned int m_cminflt;
+    long unsigned int m_majflt;
+    long unsigned int m_cmajflt;
+    long unsigned int m_utime;
+    long unsigned int m_stime;
+    long unsigned int m_cutime;
+    long unsigned int m_cstime;
+    long int m_priority;
+    long int m_nice;
+    long int m_num_threads;
+    long int m_itrealvalue;
+    long long unsigned int m_starttime;
+    long unsigned int m_vmsize;
+    long int m_rss;
+    long unsigned int m_rsslim;
+    long unsigned int m_startcode;
+    long unsigned int m_endcode;
+    long unsigned int m_startstack;
+    long unsigned int m_kstkesp;
+    long unsigned int m_kstkeip;
+    long unsigned int m_signal;
+    long unsigned int m_blocked;
+    long unsigned int m_siginore;
+    long unsigned int m_sigcatch;
+    long unsigned int m_wchan_addr;
+    long unsigned int m_nswap;
+    long unsigned int m_cnswap;
+    int m_exit_signal;
+    int m_processor;
+    unsigned int m_rt_priority;
+    unsigned int m_policy;
+    long long unsigned int m_delayacct_blkio_ticks;
+    long unsigned int m_start_data;
+    long unsigned int m_end_data;
+    long unsigned int m_start_brk;
+    long unsigned int m_arg_start;
+    long unsigned int m_arg_end;
+    long unsigned int m_env_start;
+    long unsigned int m_env_end;
+    int m_exit_code;
+    long unsigned int m_guest_time;
+    long int m_cguest_time;
+
+    // from cmdline
     std::vector<std::string> m_cmdline;
+    // from cwd
     std::string m_cwd;
-    std::string m_root;
+    // from exe
     std::string m_exe;
+    // from root
+    std::string m_root;
+    // from environ
     std::unordered_map<std::string, std::string> m_environ;
+    // from io
     struct io_stat m_io;
+    // from status
+    pid_t m_tracerpid;
     std::vector<int> m_uids;
     std::vector<int> m_gids;
     int m_cpu_usage;
@@ -266,133 +325,6 @@ private:
     /** stack **/
     std::vector<struct stack_func_t> m_stack;
 
-    // rest
-
-
-    /** The parent process ID */
-    pid_t m_ppid;
-
-    /** The process group ID of the process */
-    pid_t m_pgid;
-
-    /** The session ID of the process */
-    int m_session;
-
-    /** The controlling terminal of the process */
-    int m_tty_nr;
-
-    /** The ID of the foreground process group of the
-       * controlling terminal of the process */
-    int m_tpgid;
-
-    /** The kernel flags word of the process */
-    unsigned int m_flags;
-
-    /** The number of minor faults the process has made
-       * which have not required loading a memory page from
-       * disk */
-    long unsigned int m_minflt;
-
-    /** The number of minor faults that the process's
-       * waited-for children have made */
-    long unsigned int m_cminflt;
-
-    /** The number of major faults the process has made
-       * which have required loading a memory page from disk */
-    long unsigned int m_majflt;
-
-    /** The number of major faults that the process's
-       * waited-for children have made */
-    long unsigned int m_cmajflt;
-
-    /** Amount of time that this process has been scheduled
-       * in user mode */
-    long unsigned int m_utime;
-
-    /** Amount of time that this process has been scheduled
-       * in kernel mode */
-    long unsigned int m_stime;
-
-    /** Amount of time that this process's waited-for
-       * children have been scheduled in user mode */
-    long unsigned int m_cutime;
-
-    /** Amount of time that this process's waited-for
-       * children have been scheduled in kernel mode */
-    long unsigned int m_cstime;
-
-    long int m_priority;
-
-    long int m_nice;
-
-    long int m_num_threads;
-
-    long int m_itrealvalue;
-
-    long long unsigned int m_starttime;
-
-    long unsigned int m_vmsize;
-
-    long int m_rss;
-
-    long unsigned int m_rsslim;
-
-    long unsigned int m_startcode;
-
-    long unsigned int m_endcode;
-
-    long unsigned int m_startstack;
-
-    long unsigned int m_kstkesp;
-
-    long unsigned int m_kstkeip;
-
-    long unsigned int m_signal;
-
-    long unsigned int m_blocked;
-
-    long unsigned int m_siginore;
-
-    long unsigned int m_sigcatch;
-
-    long unsigned int m_wchan;
-
-    long unsigned int m_nswap;
-
-    long unsigned int m_cnswap;
-
-    int m_exit_signal;
-
-    int m_processor;
-
-    unsigned int m_rt_priority;
-
-    unsigned int m_policy;
-
-    long long unsigned int m_delayacct_blkio_ticks;
-
-    long unsigned int m_guest_time;
-
-    long int m_cguest_time;
-
-    long unsigned int m_start_data;
-
-    long unsigned int m_end_data;
-
-    long unsigned int m_start_brk;
-
-    long unsigned int m_arg_start;
-
-    long unsigned int m_arg_end;
-
-    long unsigned int m_env_start;
-
-    long unsigned int m_env_end;
-
-    int m_exit_code;
-
-    /** The process ID of any application that is debugging this one. 0 if none */
-    pid_t m_tracerpid;
 
     /**
       The nice level. The range should be -20 to 20. I'm not sure

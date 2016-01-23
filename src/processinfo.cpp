@@ -247,7 +247,7 @@ void ProcessInfo::readStat()
     if_stat >> this->m_blocked;
     if_stat >> this->m_siginore;
     if_stat >> this->m_sigcatch;
-    if_stat >> this->m_wchan;
+    if_stat >> this->m_wchan_addr;
     if_stat >> this->m_nswap;
     if_stat >> this->m_cnswap;
     if_stat >> this->m_exit_signal;
