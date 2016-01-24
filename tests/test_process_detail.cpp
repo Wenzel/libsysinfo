@@ -15,6 +15,6 @@ int main(int argc, char* argv[])
     int pid = atoi(argv[1]);
     ProcessInfo pinfo(pid);
     std::cout << pinfo << std::endl;
-
+    pinfo.maps();
     return 0;
 }
