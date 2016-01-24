@@ -11,6 +11,8 @@
 #include <pwd.h>
 #include <linux/kdev_t.h>
 
+#include "mmap.h"
+
 /* stolen from linux/sched.h
 * Per process flags
 */
@@ -85,43 +87,6 @@ struct cgroup_hierarchy_t
 
 };
 
-enum mapping_type
-{
-    shared,
-    priv
-};
-
-struct memory_mapping_t
-{
-    std::string address_from;
-    std::string address_to;
-    bool perm_read;
-    bool perm_write;
-    bool perm_execute;
-    enum mapping_type type;
-    int offset;
-    int dev_major;
-    int dev_minor;
-    long inode;
-    std::string pathname;
-    // smaps additional fields
-    int size;
-    int rss;
-    int pss;
-    int shared_clean;
-    int shared_dirty;
-    int private_clean;
-    int private_dirty;
-    int referenced;
-    int anonymous;
-    int anonhugepages;
-    int swap;
-    int kernelpagesize;
-    int mmupagesize;
-    int locked;
-    std::vector<std::string> vmflags;
-
-};
 
 struct limits_t
 {
@@ -262,6 +227,9 @@ public:
     // from wchan
     const std::string wchanName();
 
+    // from smaps
+    const std::vector<MMap>& maps();
+
     // computed
     int cpuUsage() const;
     const std::string userName();
@@ -303,6 +271,7 @@ private:
     bool m_need_update_environ;
     bool m_need_update_fd;
     bool m_need_update_wchan;
+    bool m_need_update_smaps;
 
     // from stat
     pid_t m_pid;
@@ -388,18 +357,19 @@ private:
     long unsigned int m_vm_pte;
     long unsigned int m_vm_pmd;
     long unsigned int m_vm_swap;
+
+    // from cgroup
+    std::vector<struct cgroup_hierarchy_t> m_cgroups;
+    // from fd
+    std::unordered_map<int, std::string> m_fds;
+    // from smaps
+    std::vector<MMap> m_maps;
+    // from limits
+    struct limits_t m_limits;
+    // from stack
+    std::vector<struct stack_func_t> m_stack;
     // computed
     int m_cpu_usage;
-    /** cgroup **/
-    std::vector<struct cgroup_hierarchy_t> m_cgroups;
-    /** fds **/
-    std::unordered_map<int, std::string> m_fds;
-    /** maps **/
-    std::vector<struct memory_mapping_t> m_maps;
-    /** limits **/
-    struct limits_t m_limits;
-    /** stack **/
-    std::vector<struct stack_func_t> m_stack;
 
 
     /**

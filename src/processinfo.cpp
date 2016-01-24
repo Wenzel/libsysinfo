@@ -48,6 +48,7 @@ ProcessInfo::ProcessInfo(pid_t pid)
     m_need_update_environ = false;
     m_need_update_fd = false;
     m_need_update_wchan = false;
+    m_need_update_smaps = false;
 
     this->needUpdate();
 }
@@ -64,6 +65,7 @@ void ProcessInfo::needUpdate()
     m_need_update_environ = true;
     m_need_update_fd = true;
     m_need_update_wchan = true;
+    m_need_update_smaps = true;
 }
 
 // getters
@@ -762,6 +764,17 @@ const std::string ProcessInfo::wchanName()
     return m_wchan_name;
 }
 
+// from smaps
+const std::vector<MMap>& ProcessInfo::maps()
+{
+    if (m_need_update_smaps)
+    {
+        readSmaps();
+        m_need_update_smaps = false;
+    }
+    return m_maps;
+}
+
 // read*
 void ProcessInfo::readCwd()
 {
@@ -1116,87 +1129,33 @@ void ProcessInfo::readCgroup()
 
 void ProcessInfo::readSmaps()
 {
+    m_maps.clear();
     std::ifstream if_smaps(m_proc_path + "/smaps");
     if (if_smaps.is_open())
     {
         // line sample
         // 00400000-00452000 r-xp 00000000 08:02 173521      /usr/bin/dbus-daemon
-        // and
+        // or
         // Shared_Clean:          0 kB
         std::string line;
-        while (std::getline(if_smaps, line))
+        std::stringstream map_stream;
+        while (if_smaps.eof())
         {
-            struct memory_mapping_t region;
-            boost::regex regex_declare_mapping("^([[:xdigit:]]+)-([[:xdigit:]]+)\\s([r-])([w-])([x-])([sp])\\s([[:xdigit:]]+)\\s([[:digit:]]+):([[:digit:]]+)\\s([[:digit:]]+)\\s+(.*)$");
-            boost::regex regex_key_value("^([[:alpha:]]+):\\s+(.*)$");
-            boost::smatch match;
-            if (boost::regex_match(line, match, regex_declare_mapping))
+            std::getline(if_smaps, line);
+            // new declaration ?
+            if (isxdigit(line.at(0)))
             {
-                if (match.size() == 11 + 1)
+                if (!map_stream.str().empty())
                 {
-                    this->m_maps.push_back(memory_mapping_t());
-                    region = this->m_maps.back();
-
-                    region.address_from = match[1];
-                    region.address_to = match[2];
-                    (match[3] == "r") ? region.perm_read = true : region.perm_read = false;
-                    (match[4] == "w") ? region.perm_write = true : region.perm_write = false;
-                    (match[5] == "x") ? region.perm_execute = true : region.perm_execute = false;
-                    (match[6] == "p") ? region.type = priv : region.type = shared;
-                    region.offset = std::stol(match[7]);
-                    region.dev_major = std::stoi(match[8]);
-                    region.dev_minor = std::stoi(match[9]);
-                    region.inode = std::stol(match[10]);
-                    region.pathname = match[11];
-                }
-            } else if (boost::regex_match(line, match, regex_key_value))
-            {
-                if (match.size() == 2 + 1)
-                {
-                    std::string value(match[2]);
-                    boost::algorithm::trim(value);
-                    boost::regex regex_value("^([[:digit:]])\\s.*$");
-                    boost::smatch match_value;
-                    if (boost::regex_match(value, match_value, regex_value))
-                    {
-                        // 4 kB
-                        if (match[1] == "Size")
-                            region.size = std::stoi(match_value[1]);
-                        else if (match[1] == "Rss")
-                            region.rss = std::stoi(match_value[1]);
-                        else if (match[1] == "Pss")
-                            region.pss = std::stoi(match_value[1]);
-                        else if (match[1] == "Shared_Clean")
-                            region.shared_clean = std::stoi(match_value[1]);
-                        else if (match[1] == "Shared_Dirty")
-                            region.shared_dirty = std::stoi(match_value[1]);
-                        else if (match[1] == "Private_Clean")
-                            region.private_clean = std::stoi(match_value[1]);
-                        else if (match[1] == "Private_Dirty")
-                            region.private_dirty = std::stoi(match_value[1]);
-                        else if (match[1] == "Referenced")
-                            region.referenced = std::stoi(match_value[1]);
-                        else if (match[1] == "Anonymous")
-                            region.anonymous = std::stoi(match_value[1]);
-                        else if (match[1] == "AnonHugePages")
-                            region.anonhugepages = std::stoi(match_value[1]);
-                        else if (match[1] == "Swap")
-                            region.swap = std::stoi(match_value[1]);
-                        else if (match[1] == "KernelPageSize")
-                            region.kernelpagesize = std::stoi(match_value[1]);
-                        else if (match[1] == "MMUPageSize")
-                            region.mmupagesize = std::stoi(match_value[1]);
-                        else if (match[1] == "Locked")
-                            region.locked = std::stoi(match_value[1]);
-
-                    } else
-                    {
-                        // VmFlags special case
-                        boost::split(region.vmflags, value, boost::is_any_of(" "));
-                    }
+                    // create map
+                    MMap map = MMap(map_stream);
+                    // append
+                    m_maps.push_back(map);
+                    // reset stream
+                    map_stream.clear();
                 }
             }
-
+            map_stream << line;
         }
     }
     if_smaps.close();

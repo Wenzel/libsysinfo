@@ -4,6 +4,7 @@ add_library(sysinfo
     sysinfo.cpp
     procconnector.cpp
     processinfo.cpp
+    mmap.cpp
 )
 
 target_link_libraries(sysinfo ${ALL_LIBS})
