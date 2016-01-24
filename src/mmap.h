@@ -16,7 +16,17 @@ class MMap
 public:
     MMap(std::stringstream& ss);
 
+    // getters
+    long unsigned int addressFrom();
+    long unsigned int addressTo();
+    bool permRead();
+    bool permWrite();
+    bool permExecute();
+    const std::string& path();
+
 private:
+
+    // properties
     long unsigned int m_address_from;
     long unsigned int m_address_to;
     bool m_perm_read;
