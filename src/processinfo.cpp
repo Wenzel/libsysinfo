@@ -1142,7 +1142,7 @@ void ProcessInfo::readSmaps()
         while (std::getline(if_smaps, line))
         {
             // new declaration ?
-            if (isxdigit(line.at(0)))
+            if (line.find('-') != std::string::npos)
             {
                 if (!map_stream.str().empty())
                 {
@@ -1152,6 +1152,7 @@ void ProcessInfo::readSmaps()
                     m_maps.push_back(map);
                     // reset stream
                     map_stream.clear();
+                    map_stream.str("");
                 }
             }
             map_stream << line;
