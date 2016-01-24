@@ -1158,6 +1158,9 @@ void ProcessInfo::readSmaps()
             map_stream << line;
             map_stream << "\n";
         }
+        // append last map
+        MMap map = MMap(map_stream);
+        m_maps.push_back(map);
     }
     if_smaps.close();
 }
