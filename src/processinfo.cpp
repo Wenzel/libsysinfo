@@ -1139,9 +1139,8 @@ void ProcessInfo::readSmaps()
         // Shared_Clean:          0 kB
         std::string line;
         std::stringstream map_stream;
-        while (!if_smaps.eof())
+        while (std::getline(if_smaps, line))
         {
-            std::getline(if_smaps, line);
             // new declaration ?
             if (isxdigit(line.at(0)))
             {
