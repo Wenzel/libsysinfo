@@ -10,7 +10,7 @@ MMap::MMap(std::stringstream& ss)
     std::string map_declaration;
     std::getline(ss, map_declaration);
     // parse declaration
-    boost::regex regex_declare_mapping("^([[:xdigit:]]+)-([[:xdigit:]]+)\\s([r-])([w-])([x-])([sp])\\s([[:xdigit:]]+)\\s([[:digit:]]+):([[:digit:]]+)\\s([[:digit:]]+)\\s+(.*)$");
+    boost::regex regex_declare_mapping("^([[:xdigit:]]+)-([[:xdigit:]]+)\\s([r-])([w-])([x-])([sp])\\s([[:xdigit:]]+)\\s([[:xdigit:]]+):([[:xdigit:]]+)\\s([[:digit:]]+)\\s+(.*)$");
     boost::regex regex_key_value("^([[:alpha:]]+):\\s+(.*)$");
     boost::smatch match;
     if (boost::regex_match(map_declaration, match, regex_declare_mapping))
