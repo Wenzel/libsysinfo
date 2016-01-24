@@ -24,8 +24,8 @@ MMap::MMap(std::stringstream& ss)
             (match[5] == "x") ? m_perm_execute = true : m_perm_execute = false;
             (match[6] == "p") ? m_type = priv : m_type = shared;
             m_offset = std::stol(match[7]);
-            m_dev_major = std::stoi(match[8]);
-            m_dev_minor = std::stoi(match[9]);
+            m_dev_major = std::stoi(match[8], 0, 16);
+            m_dev_minor = std::stoi(match[9], 0, 16);
             m_inode = std::stol(match[10]);
             m_pathname = match[11];
         }
