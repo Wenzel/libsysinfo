@@ -82,10 +82,9 @@ MMap::MMap(std::stringstream& ss)
 }
 
 // getters
-long unsigned int MMap::addressFrom() { return m_address_from; }
-
-long unsigned int MMap::addressTo() { return m_address_to; }
-bool MMap::permRead() { return m_perm_read; }
-bool MMap::permWrite() { return m_perm_write; }
-bool MMap::permExecute() { return m_perm_execute; }
-const std::string& MMap::path() { return m_pathname; }
+long unsigned int MMap::addressFrom() const { return m_address_from; }
+long unsigned int MMap::addressTo() const { return m_address_to; }
+bool MMap::permRead() const { return m_perm_read; }
+bool MMap::permWrite() const { return m_perm_write; }
+bool MMap::permExecute() const { return m_perm_execute; }
+const std::string& MMap::path() const { return m_pathname; }

@@ -17,12 +17,12 @@ public:
     MMap(std::stringstream& ss);
 
     // getters
-    long unsigned int addressFrom();
-    long unsigned int addressTo();
-    bool permRead();
-    bool permWrite();
-    bool permExecute();
-    const std::string& path();
+    long unsigned int addressFrom() const;
+    long unsigned int addressTo() const;
+    bool permRead() const;
+    bool permWrite() const;
+    bool permExecute() const;
+    const std::string& path() const;
 
 private:
 
