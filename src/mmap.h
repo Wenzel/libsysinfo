@@ -17,8 +17,8 @@ public:
     MMap(std::stringstream& ss);
 
     // getters
-    long unsigned int addressFrom() const;
-    long unsigned int addressTo() const;
+    const std::string& addressFrom() const;
+    const std::string& addressTo() const;
     bool permRead() const;
     bool permWrite() const;
     bool permExecute() const;
@@ -27,8 +27,8 @@ public:
 private:
 
     // properties
-    long unsigned int m_address_from;
-    long unsigned int m_address_to;
+    std::string m_address_from;
+    std::string m_address_to;
     bool m_perm_read;
     bool m_perm_write;
     bool m_perm_execute;

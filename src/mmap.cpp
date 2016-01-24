@@ -1,6 +1,8 @@
 #include <boost/regex.hpp>
 #include <boost/algorithm/string.hpp>
 
+#include <iostream>
+
 #include "mmap.h"
 
 MMap::MMap(std::stringstream& ss)
@@ -15,8 +17,8 @@ MMap::MMap(std::stringstream& ss)
     {
         if (match.size() == 11 + 1)
         {
-            m_address_from = std::stoi(match[1]);
-            m_address_to = std::stoi(match[2]);
+            m_address_from = match[1];
+            m_address_to = match[2];
             (match[3] == "r") ? m_perm_read = true : m_perm_read = false;
             (match[4] == "w") ? m_perm_write = true : m_perm_write = false;
             (match[5] == "x") ? m_perm_execute = true : m_perm_execute = false;
@@ -82,8 +84,8 @@ MMap::MMap(std::stringstream& ss)
 }
 
 // getters
-long unsigned int MMap::addressFrom() const { return m_address_from; }
-long unsigned int MMap::addressTo() const { return m_address_to; }
+const std::string& MMap::addressFrom() const { return m_address_from; }
+const std::string& MMap::addressTo() const { return m_address_to; }
 bool MMap::permRead() const { return m_perm_read; }
 bool MMap::permWrite() const { return m_perm_write; }
 bool MMap::permExecute() const { return m_perm_execute; }

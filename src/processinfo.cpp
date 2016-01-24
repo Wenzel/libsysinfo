@@ -1139,7 +1139,7 @@ void ProcessInfo::readSmaps()
         // Shared_Clean:          0 kB
         std::string line;
         std::stringstream map_stream;
-        while (if_smaps.eof())
+        while (!if_smaps.eof())
         {
             std::getline(if_smaps, line);
             // new declaration ?
