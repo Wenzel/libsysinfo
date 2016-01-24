@@ -1155,6 +1155,7 @@ void ProcessInfo::readSmaps()
                 }
             }
             map_stream << line;
+            map_stream << "\n";
         }
     }
     if_smaps.close();
