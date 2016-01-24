@@ -22,7 +22,10 @@ public:
     bool permRead() const;
     bool permWrite() const;
     bool permExecute() const;
+    const std::string permissions() const;
+    const std::string type() const;
     const std::string& path() const;
+    const std::vector<std::string>& vmFlags() const;
 
 private:
 

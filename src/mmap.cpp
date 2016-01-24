@@ -89,4 +89,26 @@ const std::string& MMap::addressTo() const { return m_address_to; }
 bool MMap::permRead() const { return m_perm_read; }
 bool MMap::permWrite() const { return m_perm_write; }
 bool MMap::permExecute() const { return m_perm_execute; }
+const std::string MMap::permissions() const
+{
+    std::string permissions;
+    (m_perm_read) ? permissions.append("r") : permissions.append("-");
+    (m_perm_write) ? permissions.append("w") : permissions.append("-");
+    (m_perm_execute) ? permissions.append("x") : permissions.append("-");
+    return permissions;
+}
+
+const std::string MMap::type() const
+{
+    if (m_type == shared)
+        return "Shared";
+    else
+        return "Private";
+}
+
+const std::vector<std::string>& MMap::vmFlags() const
+{
+    return m_vmflags;
+}
+
 const std::string& MMap::path() const { return m_pathname; }
