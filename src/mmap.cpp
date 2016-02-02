@@ -112,3 +112,5 @@ const std::vector<std::string>& MMap::vmFlags() const
 }
 
 const std::string& MMap::path() const { return m_pathname; }
+
+int MMap::size() const { return m_size; }

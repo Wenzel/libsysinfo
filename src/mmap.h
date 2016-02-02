@@ -26,6 +26,7 @@ public:
     const std::string type() const;
     const std::string& path() const;
     const std::vector<std::string>& vmFlags() const;
+    int size() const;
 
 private:
 
