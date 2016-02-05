@@ -596,9 +596,18 @@ const std::string ProcessInfo::userName()
         readStatus();
         m_need_update_status = false;
     }
-    struct passwd* pass;
+    std::string username;
+    struct passwd* pass = nullptr;
     pass = getpwuid(m_uids[0]); // real uid
-    return std::string(pass->pw_name);
+    if (pass == nullptr)
+    {
+        // the process is in a container, but is still visible
+        // returns the uid as the username for now
+        username = std::to_string(m_uids[0]);
+    }
+    else
+        username = std::string(pass->pw_name);
+    return username;
 }
 
 const std::vector<int>& ProcessInfo::uids()
