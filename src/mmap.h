@@ -27,8 +27,11 @@ public:
     const std::string& path() const;
     const std::vector<std::string>& vmFlags() const;
     int size() const;
+    const std::string& category() const;
 
 private:
+
+    void defineCategory();
 
     // properties
     std::string m_address_from;
@@ -58,6 +61,9 @@ private:
     int m_mmupagesize;
     int m_locked;
     std::vector<std::string> m_vmflags;
+    std::string m_category;
+
+
 };
 
 #endif // MMAP_H

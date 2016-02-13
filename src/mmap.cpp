@@ -81,6 +81,7 @@ MMap::MMap(std::stringstream& ss)
             }
         }
     }
+    defineCategory();
 }
 
 // getters
@@ -114,3 +115,20 @@ const std::vector<std::string>& MMap::vmFlags() const
 const std::string& MMap::path() const { return m_pathname; }
 
 int MMap::size() const { return m_size; }
+
+const std::string& MMap::category() const
+{
+    return m_category;
+}
+
+// TODO check with ProcessInfo context
+void MMap::defineCategory()
+{
+    if (m_pathname.find("/usr/bin") != std::string::npos
+            || m_pathname.find("/usr/lib") != std::string::npos)
+        m_category = "Image";
+    else if (m_pathname.find("[heap]") != std::string::npos)
+        m_category = "Heap";
+    else if (m_pathname.find("[stack]") != std::string::npos)
+        m_category = "Stack";
+}
