@@ -131,4 +131,8 @@ void MMap::defineCategory()
         m_category = "Heap";
     else if (m_pathname.find("[stack]") != std::string::npos)
         m_category = "Stack";
+    else if (m_pathname.empty())
+        m_category = "Private";
+    else if (m_type == shared)
+        m_category = "Shareable";
 }
