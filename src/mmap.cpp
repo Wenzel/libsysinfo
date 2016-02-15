@@ -137,7 +137,7 @@ void MMap::defineCategory()
     else if (m_type == shared)
         m_category = "Shareable";
     else if (!m_pathname.empty())
-        m_category = "Mapping File";
+        m_category = "Mapped File";
     else if (m_pathname.empty())
         m_category = "Private";
 }
