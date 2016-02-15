@@ -1,6 +1,7 @@
 include_directories(${ALL_INCLUDES})
 
 add_library(sysinfo
+    STATIC
     sysinfo.cpp
     procconnector.cpp
     processinfo.cpp
