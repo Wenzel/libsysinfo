@@ -125,14 +125,17 @@ const std::string& MMap::category() const
 void MMap::defineCategory()
 {
     if (m_pathname.find("/usr/bin") != std::string::npos
-            || m_pathname.find("/usr/lib") != std::string::npos)
+            || m_pathname.find("/usr/lib") != std::string::npos
+            || m_pathname == "[vsyscall]"
+            || m_pathname == "[vdso]"
+            || m_pathname == "[vvar]")
         m_category = "Image";
     else if (m_pathname.find("[heap]") != std::string::npos)
         m_category = "Heap";
-    else if (m_pathname.find("[stack]") != std::string::npos)
+    else if (m_pathname.find("[stack") != std::string::npos) // [stack] or [stack:tid]
         m_category = "Stack";
-    else if (m_pathname.empty())
-        m_category = "Private";
     else if (m_type == shared)
         m_category = "Shareable";
+    else if (m_pathname.empty())
+        m_category = "Private";
 }
