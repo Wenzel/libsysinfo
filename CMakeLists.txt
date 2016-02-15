@@ -52,7 +52,7 @@ add_subdirectory(src)
 #-----------------------------------------------------------------------------
 #                               TESTS
 #-----------------------------------------------------------------------------
-add_subdirectory(tests)
+# add_subdirectory(tests)
 
 # add_subdirectory("${CMAKE_SOURCE_DIR}/cmake/cpack") # enable packaging with CPack
 #-----------------------------------------------------------------------------
