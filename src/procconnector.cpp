@@ -6,6 +6,7 @@
 #include "procconnector.h"
 
 ProcConnector::ProcConnector()
+    : m_thread_listen(nullptr)
 {
     connect();
     subscribe();
@@ -14,6 +15,8 @@ ProcConnector::ProcConnector()
 ProcConnector::~ProcConnector()
 {
     close(m_nl_sock);
+    if (m_thread_listen != nullptr)
+        delete m_thread_listen;
 }
 
 void ProcConnector::connect()
@@ -73,7 +76,25 @@ void ProcConnector::addCallback(std::function<void(struct proc_event)> callback)
     m_subscribers.push_back(callback);
 }
 
-void ProcConnector::listen()
+void ProcConnector::listen(bool block)
+{
+    if (block)
+    {
+        listenBlock();
+    }
+    else
+    {
+        m_thread_listen = new std::thread(&ProcConnector::listenBlock, this);
+    }
+}
+
+void ProcConnector::listenBlock()
+{
+    while (1)
+        processEvent();
+}
+
+void ProcConnector::processEvent()
 {
     int rc;
     struct __attribute__ ((aligned(NLMSG_ALIGNTO))) {
@@ -84,18 +105,16 @@ void ProcConnector::listen()
         };
     } nlcn_msg;
 
-    while (1) {
-        rc = recv(m_nl_sock, &nlcn_msg, sizeof(nlcn_msg), 0);
-        if (rc == -1) {
-            if (errno == EINTR)
-                continue;
-            else
-            {
-                throw std::string(std::strerror(errno));
-                return;
-            }
+    rc = recv(m_nl_sock, &nlcn_msg, sizeof(nlcn_msg), 0);
+    if (rc == -1) {
+        if (errno == EINTR)
+            return;
+        else
+        {
+            throw std::string(std::strerror(errno));
+            return;
         }
-        for (std::function<void(struct proc_event)> callback: m_subscribers)
-            callback(nlcn_msg.proc_ev);
     }
+    for (std::function<void(struct proc_event)> callback: m_subscribers)
+        callback(nlcn_msg.proc_ev);
 }

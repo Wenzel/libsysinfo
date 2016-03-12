@@ -9,23 +9,7 @@
 
 #include "sysinfo.h"
 
-// local variables
-static ProcConnector* connector;
-static std::thread* event_thread;
-
 // Public API
-
-
-// init
-void sysinfoInit()
-{
-    connector = new ProcConnector();
-}
-
-void startProcessEventListening()
-{
-    event_thread = new std::thread(&ProcConnector::listen, connector);
-}
 
 // System info
 std::vector<cpu_info_t> readCPUInfo()
@@ -189,13 +173,6 @@ std::vector<ProcessInfo> processList()
 
     }
     return process_list;
-}
-
-// TODO
-
-void addCallbackProcessEvent(std::function<void (proc_event)> callback)
-{
-    connector->addCallback(callback);
 }
 
 // Network

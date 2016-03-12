@@ -16,10 +16,6 @@
 #include "procconnector.h"
 #include "processinfo.h"
 
-// init
-void sysinfoInit();
-void startProcessEventListening();
-
 struct cpu_info_t
 {
     int processor;
@@ -60,9 +56,6 @@ int getNbCores();
 std::vector<int> processListPid();
 int processCount();
 std::vector<ProcessInfo> processList();
-
-void addCallbackProcessEvent(std::function<void(struct proc_event)> callback);
-
 // network
 
 enum socket_state {
