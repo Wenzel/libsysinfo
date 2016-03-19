@@ -143,6 +143,7 @@ class ProcessInfo
 {
 
 public:
+    ProcessInfo();
     ProcessInfo(pid_t pid);
     ~ProcessInfo();
 

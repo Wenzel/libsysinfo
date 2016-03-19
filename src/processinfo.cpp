@@ -34,6 +34,11 @@ std::ostream& operator<<(std::ostream& os, ProcessInfo& p)
     return os;
 }
 
+ProcessInfo::ProcessInfo()
+{
+    m_pid = 0;
+}
+
 ProcessInfo::ProcessInfo(pid_t pid)
 {
     m_pid = pid;
