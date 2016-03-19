@@ -12,6 +12,7 @@
 #include <linux/kdev_t.h>
 
 #include "mmap.h"
+#include "sysinfo.h"
 
 /* stolen from linux/sched.h
 * Per process flags

@@ -16,6 +16,9 @@
 #include "procconnector.h"
 #include "processinfo.h"
 
+// fwd
+class ProcessInfo;
+
 struct cpu_info_t
 {
     int processor;
