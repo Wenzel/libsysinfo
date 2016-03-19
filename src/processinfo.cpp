@@ -768,7 +768,7 @@ const std::string ProcessInfo::wchanName()
     if (m_need_update_wchan)
     {
         readWchan();
-        m_need_update_wchan;
+        m_need_update_wchan = false;
     }
     return m_wchan_name;
 }
