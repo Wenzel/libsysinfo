@@ -275,6 +275,7 @@ private:
     bool m_need_update_fd;
     bool m_need_update_wchan;
     bool m_need_update_smaps;
+    bool m_need_update_cpu_usage;
 
     // from stat
     pid_t m_pid;

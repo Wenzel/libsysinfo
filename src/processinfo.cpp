@@ -54,6 +54,7 @@ ProcessInfo::ProcessInfo(pid_t pid)
     m_need_update_fd = false;
     m_need_update_wchan = false;
     m_need_update_smaps = false;
+    m_need_update_cpu_usage = false;
 
     this->needUpdate();
 }
@@ -76,6 +77,7 @@ void ProcessInfo::needUpdate()
     m_need_update_fd = true;
     m_need_update_wchan = true;
     m_need_update_smaps = true;
+    m_need_update_cpu_usage = true;
 }
 
 // getters
@@ -598,11 +600,10 @@ const std::unordered_map<std::string, std::string> ProcessInfo::environ()
 
 int ProcessInfo::cpuUsage()
 {
-    if (m_need_update_stat)
+    if (m_need_update_cpu_usage)
     {
-        readStat();
-        m_need_update_stat = false;
         updateCPUUsage();
+        m_need_update_cpu_usage = false;
     }
     return m_cpu_usage;
 }
@@ -1333,7 +1334,7 @@ void ProcessInfo::updateCPUUsage()
     cpu_total_time = user + nice + system + idle;
 
     // get process_total_time
-    long long unsigned process_total_time = this->m_utime + this->m_stime;
+    long long unsigned process_total_time = utime() + stime();
     struct old_cpu_time_t old_cpu_time;
 
 
