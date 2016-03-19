@@ -170,6 +170,10 @@ std::vector<ProcessInfo> processList()
         {
             continue;
         }
+        catch (std::ios_base::failure e) // the process died while we tried to read a file
+        {
+            continue;
+        }
 
     }
     return process_list;
