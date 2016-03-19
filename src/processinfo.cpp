@@ -53,6 +53,11 @@ ProcessInfo::ProcessInfo(pid_t pid)
     this->needUpdate();
 }
 
+ProcessInfo::~ProcessInfo()
+{
+    map_pid_usage.erase(m_pid);
+}
+
 void ProcessInfo::needUpdate()
 {
     m_need_update_stat = true;

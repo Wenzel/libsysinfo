@@ -144,6 +144,7 @@ class ProcessInfo
 
 public:
     ProcessInfo(pid_t pid);
+    ~ProcessInfo();
 
     void needUpdate();
 
@@ -376,7 +377,7 @@ private:
     /**
       The nice level. The range should be -20 to 20. I'm not sure
       whether this is true for all platforms.
-     */
+      /
     int m_niceLevel;
 
     /** The i/o scheduling class and priority. */
