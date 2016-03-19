@@ -234,7 +234,7 @@ public:
     const std::vector<MMap>& maps();
 
     // computed
-    int cpuUsage() const;
+    int cpuUsage();
     const std::string userName();
 
 private:

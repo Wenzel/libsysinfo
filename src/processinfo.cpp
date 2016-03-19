@@ -596,7 +596,16 @@ const std::unordered_map<std::string, std::string> ProcessInfo::environ()
     return m_environ;
 }
 
-int ProcessInfo::cpuUsage() const { return m_cpu_usage; }
+int ProcessInfo::cpuUsage()
+{
+    if (m_need_update_stat)
+    {
+        readStat();
+        m_need_update_stat = false;
+        updateCPUUsage();
+    }
+    return m_cpu_usage;
+}
 
 // from status
 const std::string ProcessInfo::userName()
@@ -900,8 +909,6 @@ void ProcessInfo::readStat()
     if_stat >> this->m_env_end;
     if_stat >> this->m_exit_code;
     if_stat.close();
-
-    updateCPUUsage();
 }
 
 void ProcessInfo::readStatus()
