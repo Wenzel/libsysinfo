@@ -147,6 +147,7 @@ class ProcessInfo
 public:
     ProcessInfo();
     ProcessInfo(pid_t pid);
+    ProcessInfo(const ProcessInfo& pinfo);
     ~ProcessInfo();
 
     void needUpdate();
@@ -245,7 +246,7 @@ public:
 
 private:
     // static
-    static std::unordered_map<int, struct old_cpu_time_t> map_pid_usage;
+    static std::unordered_map<int, ProcessInfo*> map_pid_oldstate;
 
     // functions
     void readCwd();
@@ -380,6 +381,10 @@ private:
     std::vector<struct stack_func_t> m_stack;
     // computed
     int m_cpu_usage;
+
+    // old
+    long long unsigned m_last_cpu_total_time;
+    long long unsigned m_last_process_total_time;
 
 
     /**

@@ -12,7 +12,7 @@
 #include "processinfo.h"
 
 // static init
-std::unordered_map<int, struct old_cpu_time_t> ProcessInfo::map_pid_usage;
+std::unordered_map<int, ProcessInfo*> ProcessInfo::map_pid_oldstate;
 
 // overload operator<<
 std::ostream& operator<<(std::ostream& os, ProcessInfo& p)
@@ -57,6 +57,12 @@ ProcessInfo::ProcessInfo(pid_t pid)
     m_need_update_cpu_usage = false;
 
     this->needUpdate();
+}
+
+ProcessInfo::ProcessInfo(const ProcessInfo &pinfo)
+{
+    m_last_cpu_total_time = pinfo.m_last_cpu_total_time;
+    m_last_process_total_time = pinfo.m_last_process_total_time;
 }
 
 ProcessInfo::~ProcessInfo()
@@ -1358,29 +1364,26 @@ void ProcessInfo::updateCPUUsage()
 
     // get process_total_time
     long long unsigned process_total_time = utime() + stime();
-    struct old_cpu_time_t old_cpu_time;
 
-
-    if (ProcessInfo::map_pid_usage.find(this->m_pid) == map_pid_usage.end())
+    if (ProcessInfo::map_pid_oldstate.find(m_pid) == map_pid_oldstate.end())
     {
         // insert
-        old_cpu_time.cpu_total_time = cpu_total_time;
-        old_cpu_time.proc_total_time = process_total_time;
-        ProcessInfo::map_pid_usage[this->m_pid] = old_cpu_time;
+        m_last_cpu_total_time = cpu_total_time;
+        m_last_process_total_time = process_total_time;
+        ProcessInfo::map_pid_oldstate[m_pid] = new ProcessInfo(*this);
     }
     else
     {
         // retrieve old value
-        old_cpu_time = ProcessInfo::map_pid_usage[this->m_pid];
-        long long unsigned delta_cpu_time = cpu_total_time - old_cpu_time.cpu_total_time;
-        long long unsigned delta_process_time = process_total_time - old_cpu_time.proc_total_time;
+        ProcessInfo* oldstate = ProcessInfo::map_pid_oldstate[m_pid];
+        long long unsigned delta_cpu_time = cpu_total_time - oldstate->m_last_cpu_total_time;
+        long long unsigned delta_process_time = process_total_time - oldstate->m_last_process_total_time;
         if (delta_cpu_time != 0)
             cpu_usage = 100 * nb_core * delta_process_time / delta_cpu_time;
 
         // update old values
-        old_cpu_time.cpu_total_time = cpu_total_time;
-        old_cpu_time.proc_total_time = process_total_time;
-        ProcessInfo::map_pid_usage[this->m_pid] = old_cpu_time;
+        oldstate->m_last_cpu_total_time = cpu_total_time;
+        oldstate->m_last_process_total_time = process_total_time;
     }
 
     this->m_cpu_usage = cpu_usage;
