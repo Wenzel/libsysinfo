@@ -1081,6 +1081,8 @@ void ProcessInfo::readEnviron()
 void ProcessInfo::readIo()
 {
     std::ifstream if_io(m_proc_path + "io");
+    // update time since last read
+    m_io.last_read = time(nullptr);
     std::string line;
     while (getline(if_io, line))
     {

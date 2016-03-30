@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include <string>
 #include <vector>
+#include <ctime>
 
 #include <sys/types.h>
 #include <pwd.h>
@@ -77,7 +78,8 @@ struct io_stat
      * write_bytes) will not be happening.
     */
     long unsigned int cancelled_write_bytes;
-
+    // time when we last read the file
+    std::time_t last_read;
 };
 
 struct cgroup_hierarchy_t
