@@ -619,16 +619,6 @@ long unsigned int ProcessInfo::writeBytes()
     return m_io.write_bytes;
 }
 
-int ProcessInfo::cpuUsage()
-{
-    if (m_need_update_cpu_usage)
-    {
-        updateCPUUsage();
-        m_need_update_cpu_usage = false;
-    }
-    return m_cpu_usage;
-}
-
 // from status
 const std::string ProcessInfo::userName()
 {
@@ -1336,6 +1326,16 @@ void ProcessInfo::readStack()
     if_stack.close();
 }
 
+// computed
+int ProcessInfo::cpuUsage()
+{
+    if (m_need_update_cpu_usage)
+    {
+        updateCPUUsage();
+        m_need_update_cpu_usage = false;
+    }
+    return m_cpu_usage;
+}
 
 void ProcessInfo::updateCPUUsage()
 {
