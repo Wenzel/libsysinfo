@@ -598,6 +598,27 @@ const std::unordered_map<std::string, std::string> ProcessInfo::environ()
     return m_environ;
 }
 
+// from io
+long unsigned int ProcessInfo::readBytes()
+{
+    if (m_need_update_io)
+    {
+        readIo();
+        m_need_update_io = false;
+    }
+    return m_io.read_bytes;
+}
+
+long unsigned int ProcessInfo::writeBytes()
+{
+    if (m_need_update_io)
+    {
+        readIo();
+        m_need_update_io = false;
+    }
+    return m_io.write_bytes;
+}
+
 int ProcessInfo::cpuUsage()
 {
     if (m_need_update_cpu_usage)

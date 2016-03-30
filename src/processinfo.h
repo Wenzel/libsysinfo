@@ -226,6 +226,10 @@ public:
     // from environ
     const std::unordered_map<std::string, std::string> environ();
 
+    // from io
+    long unsigned int readBytes();
+    long unsigned int writeBytes();
+
     // from fd/
     const std::unordered_map<int, std::string>& fds();
 
