@@ -61,8 +61,11 @@ ProcessInfo::ProcessInfo(pid_t pid)
 
 ProcessInfo::ProcessInfo(const ProcessInfo &pinfo)
 {
+    // cpu usage
     m_last_cpu_total_time = pinfo.m_last_cpu_total_time;
     m_last_process_total_time = pinfo.m_last_process_total_time;
+    // io usage
+    m_io = pinfo.m_io;
 }
 
 ProcessInfo::~ProcessInfo()
@@ -1341,6 +1344,35 @@ int ProcessInfo::cpuUsage()
         m_need_update_cpu_usage = false;
     }
     return m_cpu_usage;
+}
+
+double ProcessInfo::ioReadUsage()
+{
+    // get latest read_bytes
+    long unsigned int read_bytes = readBytes();
+    // get time
+    std::time_t last_time = m_io.last_read;
+
+    double io_read_usage = 0;
+    // already inserted ?
+    if (ProcessInfo::map_pid_oldstate.find(m_pid) == map_pid_oldstate.end())
+    {
+        // insert
+        ProcessInfo::map_pid_oldstate[m_pid] = new ProcessInfo(*this);
+    }
+    else
+    {
+        // get old state
+        ProcessInfo* oldstate = ProcessInfo::map_pid_oldstate[m_pid];
+        // compute deltas
+        long unsigned int delta_read = read_bytes - oldstate->m_io.read_bytes;
+        std::time_t delta_time = last_time - oldstate->m_io.last_read;
+        io_read_usage = delta_read / delta_time;
+
+        // update old state
+        oldstate->m_io = m_io;
+    }
+    return io_read_usage;
 }
 
 void ProcessInfo::updateCPUUsage()
