@@ -55,6 +55,8 @@ ProcessInfo::ProcessInfo(pid_t pid)
     m_need_update_wchan = false;
     m_need_update_smaps = false;
     m_need_update_cpu_usage = false;
+    m_need_update_io_read_usage = false;
+    m_need_update_io_write_usage = false;
 
     this->needUpdate();
 }
@@ -87,6 +89,8 @@ void ProcessInfo::needUpdate()
     m_need_update_wchan = true;
     m_need_update_smaps = true;
     m_need_update_cpu_usage = true;
+    m_need_update_io_read_usage = true;
+    m_need_update_io_write_usage = true;
 }
 
 // getters
@@ -1348,6 +1352,26 @@ int ProcessInfo::cpuUsage()
 
 double ProcessInfo::ioReadUsage()
 {
+    if (m_need_update_io_read_usage)
+    {
+        updateIoReadUsage();
+        m_need_update_io_read_usage = false;
+    }
+    return m_io_read_usage;
+}
+
+double ProcessInfo::ioWriteUsage()
+{
+    if (m_need_update_io_write_usage)
+    {
+        updateIoWriteUsage();
+        m_need_update_io_write_usage = false;
+    }
+    return m_io_write_usage;
+}
+
+void ProcessInfo::updateIoReadUsage()
+{
     // get latest read_bytes
     long unsigned int read_bytes = readBytes();
     // get time
@@ -1373,10 +1397,10 @@ double ProcessInfo::ioReadUsage()
         // update old state
         oldstate->m_io = m_io;
     }
-    return io_read_usage;
+    m_io_read_usage = io_read_usage;
 }
 
-double ProcessInfo::ioWriteUsage()
+void ProcessInfo::updateIoWriteUsage()
 {
     // get latest read_bytes
     long unsigned int write_bytes = writeBytes();
@@ -1403,15 +1427,12 @@ double ProcessInfo::ioWriteUsage()
         // update old state
         oldstate->m_io = m_io;
     }
-    return io_write_usage;
+    m_io_write_usage = io_write_usage;
 }
 
 double ProcessInfo::ioTotalUsage()
 {
-    double a = ioReadUsage();
-    double b = ioWriteUsage();
-    double c = a + b;
-    return c;
+    return ioReadUsage() + ioWriteUsage();
 }
 
 void ProcessInfo::updateCPUUsage()

@@ -255,13 +255,15 @@ private:
     void readEnviron();
     void readIo();
     void readWchan();
-    void updateCPUUsage();
     void readFd();
     void readCgroup();
     void readSmaps();
     void readLimits();
     void readStack();
 
+    void updateCPUUsage();
+    void updateIoReadUsage();
+    void updateIoWriteUsage();
 
     // friend
     friend std::ostream & operator<<(std::ostream &os, ProcessInfo& p);
@@ -280,6 +282,8 @@ private:
     bool m_need_update_wchan;
     bool m_need_update_smaps;
     bool m_need_update_cpu_usage;
+    bool m_need_update_io_read_usage;
+    bool m_need_update_io_write_usage;
 
     // from stat
     pid_t m_pid;
@@ -378,6 +382,8 @@ private:
     std::vector<struct stack_func_t> m_stack;
     // computed
     int m_cpu_usage;
+    double m_io_read_usage;
+    double m_io_write_usage;
 
     // old
     long long unsigned m_last_cpu_total_time;
