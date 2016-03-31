@@ -1375,6 +1375,40 @@ double ProcessInfo::ioReadUsage()
     return io_read_usage;
 }
 
+double ProcessInfo::ioWriteUsage()
+{
+    // get latest read_bytes
+    long unsigned int write_bytes = writeBytes();
+    // get time
+    std::time_t last_time = m_io.last_read;
+
+    double io_write_usage = 0;
+    // already inserted ?
+    if (ProcessInfo::map_pid_oldstate.find(m_pid) == map_pid_oldstate.end())
+    {
+        // insert
+        ProcessInfo::map_pid_oldstate[m_pid] = new ProcessInfo(*this);
+    }
+    else
+    {
+        // get old state
+        ProcessInfo* oldstate = ProcessInfo::map_pid_oldstate[m_pid];
+        // compute deltas
+        long unsigned int delta_write = write_bytes - oldstate->m_io.write_bytes;
+        std::time_t delta_time = last_time - oldstate->m_io.last_read;
+        io_write_usage = delta_write / delta_time;
+
+        // update old state
+        oldstate->m_io = m_io;
+    }
+    return io_write_usage;
+}
+
+double ProcessInfo::ioTotalUsage()
+{
+    return ioReadUsage() + ioWriteUsage();
+}
+
 void ProcessInfo::updateCPUUsage()
 {
     static int nb_core = getNbCores();

@@ -243,6 +243,8 @@ public:
     // computed
     int cpuUsage();
     double ioReadUsage();
+    double ioWriteUsage();
+    double ioTotalUsage();
     const std::string userName();
 
 private:
