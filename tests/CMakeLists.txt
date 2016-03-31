@@ -1,10 +1,9 @@
 include_directories(${libsysinfo_SOURCE_DIR}/src)
 
-add_executable(test_simple test_simple.cpp)
-target_link_libraries(test_simple sysinfo)
+file(GLOB TESTS *.cpp)
 
-add_executable(test_procconnector test_procconnector.cpp)
-target_link_libraries(test_procconnector sysinfo)
-
-add_executable(test_process_detail test_process_detail.cpp)
-target_link_libraries(test_process_detail sysinfo)
+foreach (test_file ${TESTS})
+    get_filename_component(test_name ${test_file} NAME_WE)
+    add_executable(${test_name} ${test_file})
+    target_link_libraries(${test_name} sysinfo)
+endforeach (test_file)
