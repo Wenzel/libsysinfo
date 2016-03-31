@@ -1367,7 +1367,8 @@ double ProcessInfo::ioReadUsage()
         // compute deltas
         long unsigned int delta_read = read_bytes - oldstate->m_io.read_bytes;
         std::chrono::duration<double, std::ratio<1,1>> delta_time = last_time - oldstate->m_io.last_read;
-        io_read_usage = delta_read / delta_time.count();
+        if (delta_time.count() != 0)
+            io_read_usage = delta_read / delta_time.count();
 
         // update old state
         oldstate->m_io = m_io;
@@ -1396,7 +1397,8 @@ double ProcessInfo::ioWriteUsage()
         // compute deltas
         long unsigned int delta_write = write_bytes - oldstate->m_io.write_bytes;
         std::chrono::duration<double, std::ratio<1,1>> delta_time = last_time - oldstate->m_io.last_read;
-        io_write_usage = delta_write / delta_time.count();
+        if (delta_time.count() != 0)
+            io_write_usage = delta_write / delta_time.count();
 
         // update old state
         oldstate->m_io = m_io;
@@ -1406,7 +1408,10 @@ double ProcessInfo::ioWriteUsage()
 
 double ProcessInfo::ioTotalUsage()
 {
-    return ioReadUsage() + ioWriteUsage();
+    double a = ioReadUsage();
+    double b = ioWriteUsage();
+    double c = a + b;
+    return c;
 }
 
 void ProcessInfo::updateCPUUsage()
