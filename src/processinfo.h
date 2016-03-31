@@ -135,12 +135,6 @@ struct stack_func_t
     std::string function;
 };
 
-struct old_cpu_time_t
-{
-    long long unsigned cpu_total_time;
-    long long unsigned proc_total_time;
-};
-
 class ProcessInfo
 {
 
