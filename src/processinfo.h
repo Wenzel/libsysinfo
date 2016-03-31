@@ -6,7 +6,7 @@
 #include <unordered_map>
 #include <string>
 #include <vector>
-#include <ctime>
+#include <chrono>
 
 #include <sys/types.h>
 #include <pwd.h>
@@ -79,7 +79,7 @@ struct io_stat
     */
     long unsigned int cancelled_write_bytes;
     // time when we last read the file
-    std::time_t last_read;
+    std::chrono::system_clock::time_point last_read;
 };
 
 struct cgroup_hierarchy_t

@@ -1102,7 +1102,7 @@ void ProcessInfo::readIo()
 {
     std::ifstream if_io(m_proc_path + "io");
     // update time since last read
-    m_io.last_read = time(nullptr);
+    m_io.last_read = std::chrono::system_clock::now();
     std::string line;
     while (getline(if_io, line))
     {
@@ -1351,7 +1351,7 @@ double ProcessInfo::ioReadUsage()
     // get latest read_bytes
     long unsigned int read_bytes = readBytes();
     // get time
-    std::time_t last_time = m_io.last_read;
+    std::chrono::system_clock::time_point last_time = m_io.last_read;
 
     double io_read_usage = 0;
     // already inserted ?
@@ -1366,8 +1366,8 @@ double ProcessInfo::ioReadUsage()
         ProcessInfo* oldstate = ProcessInfo::map_pid_oldstate[m_pid];
         // compute deltas
         long unsigned int delta_read = read_bytes - oldstate->m_io.read_bytes;
-        std::time_t delta_time = last_time - oldstate->m_io.last_read;
-        io_read_usage = delta_read / delta_time;
+        std::chrono::duration<double, std::ratio<1,1>> delta_time = last_time - oldstate->m_io.last_read;
+        io_read_usage = delta_read / delta_time.count();
 
         // update old state
         oldstate->m_io = m_io;
@@ -1380,7 +1380,7 @@ double ProcessInfo::ioWriteUsage()
     // get latest read_bytes
     long unsigned int write_bytes = writeBytes();
     // get time
-    std::time_t last_time = m_io.last_read;
+    std::chrono::system_clock::time_point last_time = m_io.last_read;
 
     double io_write_usage = 0;
     // already inserted ?
@@ -1395,8 +1395,8 @@ double ProcessInfo::ioWriteUsage()
         ProcessInfo* oldstate = ProcessInfo::map_pid_oldstate[m_pid];
         // compute deltas
         long unsigned int delta_write = write_bytes - oldstate->m_io.write_bytes;
-        std::time_t delta_time = last_time - oldstate->m_io.last_read;
-        io_write_usage = delta_write / delta_time;
+        std::chrono::duration<double, std::ratio<1,1>> delta_time = last_time - oldstate->m_io.last_read;
+        io_write_usage = delta_write / delta_time.count();
 
         // update old state
         oldstate->m_io = m_io;
