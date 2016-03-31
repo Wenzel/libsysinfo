@@ -3,6 +3,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <boost/algorithm/string/join.hpp>
+#include <chrono>
 
 int main(int argc, char* argv[])
 {
@@ -16,7 +17,7 @@ int main(int argc, char* argv[])
     ProcessInfo pinfo(pid);
     while (1)
     {
-        std::cout << "io read usage : " << pinfo.ioReadUsage() << " b/s" << std::endl;
+        std::cout << "io total usage : " << pinfo.ioTotalUsage() << " B/s" << std::endl;
         pinfo.needUpdate();
         sleep(1);
     }
