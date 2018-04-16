@@ -61,15 +61,6 @@ ProcessInfo::ProcessInfo(pid_t pid)
     this->needUpdate();
 }
 
-ProcessInfo::ProcessInfo(const ProcessInfo &pinfo)
-{
-    // cpu usage
-    m_last_cpu_total_time = pinfo.m_last_cpu_total_time;
-    m_last_process_total_time = pinfo.m_last_process_total_time;
-    // io usage
-    m_io = pinfo.m_io;
-}
-
 ProcessInfo::~ProcessInfo()
 {
 
@@ -1144,15 +1135,19 @@ void ProcessInfo::readWchan()
 
 void ProcessInfo::readFd()
 {
-    boost::filesystem::path fd_dir_path(m_proc_path + "/fd");
-    boost::filesystem::directory_iterator end_itr;
-    for (boost::filesystem::directory_iterator itr(fd_dir_path);
-         itr != end_itr;
-         ++itr)
-    {
-        boost::system::error_code ec;
-        boost::filesystem::path symlink = boost::filesystem::read_symlink(itr->path(), ec);
-        this->m_fds[std::stoi(itr->path().filename().string())] = symlink.string();
+    try {
+        boost::filesystem::path fd_dir_path(m_proc_path + "fd");
+        boost::filesystem::directory_iterator end_itr;
+        for (boost::filesystem::directory_iterator itr(fd_dir_path);
+             itr != end_itr;
+             ++itr)
+        {
+            boost::system::error_code ec;
+            boost::filesystem::path symlink = boost::filesystem::read_symlink(itr->path(), ec);
+            this->m_fds[std::stoi(itr->path().filename().string())] = symlink.string();
+        }
+    } catch (boost::filesystem::filesystem_error e) {
+        // permission denied
     }
 }
 

@@ -141,7 +141,7 @@ class ProcessInfo
 public:
     ProcessInfo();
     ProcessInfo(pid_t pid);
-    ProcessInfo(const ProcessInfo& pinfo);
+    ProcessInfo(const ProcessInfo& pinfo) = default;
     ~ProcessInfo();
 
     void needUpdate();
